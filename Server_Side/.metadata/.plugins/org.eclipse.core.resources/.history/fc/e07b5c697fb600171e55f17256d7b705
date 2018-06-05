@@ -1,0 +1,25 @@
+package FileAction.GetData;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public abstract class GetFilterdData extends FileActionGetLines
+{
+
+	public GetFilterdData(String i_Path)
+	{
+		super(i_Path);
+	}
+
+	@Override
+	protected void doOnEveryLine(JSONObject i_CurrentJSONObject, JSONArray i_Array) throws JSONException
+	{
+		if(theCondition(i_CurrentJSONObject))
+		{
+			i_Array.put(i_CurrentJSONObject);
+		}
+	}
+
+	protected abstract boolean theCondition(JSONObject i_CurrentJSONObject) throws JSONException;
+}

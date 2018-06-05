@@ -1,0 +1,76 @@
+package UI.Panels;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import ServerFunctions.ServerFunctionExecuter;
+import UI.superButton;
+
+public class LoginPanel extends superPanel
+{
+	
+	private superButton loginButton;
+	private JTextField userText;
+	private JPasswordField userPass;
+	private JLabel userNameLabel;
+	private JLabel passWordLabel;
+	private JLabel imageLabel;
+	
+	public LoginPanel()
+	{
+		super();
+	}
+	
+	@Override
+	protected void createComponents(){
+		 userNameLabel = new JLabel("Worker Number ");
+		 userNameLabel.setForeground(Color.white);
+		 userNameLabel.setPreferredSize(new Dimension(centerPanel.getWidth()/2, height));
+		 userText = new JTextField(6);
+		 
+
+		 passWordLabel = new JLabel("                                Password ");
+		 passWordLabel.setForeground(Color.white);
+		 userPass = new JPasswordField(10);
+		 
+		 loginButton = new superButton("Login");
+		 
+		 imageLabel = new JLabel();
+		 ImageIcon sosIcon = new ImageIcon(this.getClass().getResource("images/SOS.jpg"));
+         imageLabel.setIcon(sosIcon);
+	}
+	
+	@Override
+	protected void attachToPanels(){
+		 upPanel.setPreferredSize( new Dimension( 130, 200 ) );
+		 centerPanel.add(userNameLabel);
+		 centerPanel.add(userText);
+		 centerPanel.add(passWordLabel);
+		 centerPanel.add(userPass);
+		 centerPanel.add(loginButton);
+         upPanel.add(imageLabel);
+	}
+	
+	public superButton getLogInButton(){
+		return loginButton;
+	}
+	
+	public JTextField getUserName(){
+		return userText;
+	}
+	
+	public JPasswordField getPassword(){
+		return userPass;
+	}
+
+	@Override
+	protected void addEvents() {
+		// TODO Auto-generated method stub
+		
+	}
+}

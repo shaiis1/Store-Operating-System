@@ -1,0 +1,79 @@
+package UI.Frames.AddRemove;
+
+
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import UI.buttonedInterface;
+import UI.superButton;
+import UI.Frames.ButtonMenuFrame;
+import Workers.Worker;
+
+@SuppressWarnings("serial")
+public class RegisterFrame extends ButtonMenuFrame implements buttonedInterface {
+	
+	private superButton addNewWorkerButton;
+	private superButton addNewCustomerButton;
+	
+	public RegisterFrame() throws Exception{
+		super();
+		createButtons();
+		setFrame();
+		addEvents();
+	}
+	
+	@Override
+	protected void setFrame(){
+		this.setTitle("New Register");
+		super.setFrame();
+	}
+	
+	public void createButtons(){
+		addNewWorkerButton = new superButton("New worker",Color.ORANGE);
+		addNewCustomerButton = new superButton("New customer",Color.ORANGE);
+		addButtonsToPanel();
+	}
+		
+	public void addButtonsToPanel(){
+		mainPanel.add(addNewWorkerButton);
+		mainPanel.add(addNewCustomerButton);
+	}
+	
+	public void addEvents(){
+		
+		//addNewWorkerButton On Click
+		addNewWorkerButton.addActionListener(new ActionListener(){
+	      public void actionPerformed(ActionEvent e){
+	    	  Thread newWorkerThread = new Thread(new Runnable(){
+	    		  @Override
+	    		  public void run(){
+	    			  try{
+	    					new addNewWorkerFrame();
+	    			  }
+	    			  catch (Exception e1){
+	    					e1.printStackTrace();
+	    			  }
+	    		  }	  
+	    	  });
+	    	  newWorkerThread.start();
+	      }});
+		
+		//addNewCustomerButton On Click
+		addNewCustomerButton.addActionListener(new ActionListener(){
+		      public void actionPerformed(ActionEvent e){
+		    	  Thread newCustomerThread = new Thread(new Runnable(){
+		    		  @Override
+		    		  public void run(){
+		    			  try{
+		    					new addNewCustomerFrame();
+		    			  }
+		    			  catch (Exception e1){
+		    					e1.printStackTrace();
+		    			  }
+		    		  }	  
+		    	  });
+		    	  newCustomerThread.start();
+		      }});
+	}
+}

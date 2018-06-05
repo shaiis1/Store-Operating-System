@@ -1,0 +1,5 @@
+package UI.TablesDecorators;
+
+public class ChatTableCellRenderer {
+
+}

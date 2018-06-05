@@ -1,0 +1,7 @@
+package UI;
+
+public class Popups
+{
+	public static void Error(String i_Message)
+
+}

@@ -1,0 +1,337 @@
+package FilesManeger;
+
+import java.io.*;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
+
+import javax.xml.bind.ValidationException;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import Customer.*;
+import Workers.*;
+import FileActions.FileActions;
+import FileActionsExceptions.AllReadyExistsException;
+import FileActionsExceptions.DeleteFileException;
+import FileActionsExceptions.IncompatibleException;
+import FileActionsExceptions.NotFoundException;
+import FileActionsExceptions.OutOfRangeException;
+import FileActionsExceptions.RenameFileException;
+import Items.Item;
+import Items.ItemAmount;
+import Person.Person;
+import Purchase.Purchase;
+
+
+public class FilesManager
+{
+	private static FilesManager m_Instance = null;
+	
+	private final String db_customers_path = "DB_Customers.txt";
+	private final String db_items_path = "DB_Items.txt";
+	private final String db_purchases_path = "DB_PurchasesRecoreds.txt";
+	private final String db_workers = "DB_Workes.txt";
+	private final String db_itemsAmount_path = "DB_ItemsAmount.txt";
+	private final String db_users_path = "DB_Users.txt";
+	private final String db_purchasetrack_path = "DB_PurchaseTracks.txt";
+	
+	private FileActions m_Workers_DB;
+	private FileActions m_ItemsAmount_DB;
+	private FileActions m_ExistItems_DB;
+	private FileActions m_Customers_DB;
+	private FileActions m_PurchaseRecordes_DB;
+	private FileActions m_UsersFile_DB;
+	private FileActions m_PurchaseTracks_DB;
+	
+	private FilesManager()
+	{
+		InitializFileActions();
+	}
+	
+	private void InitializFileActions()
+	{
+
+		m_ItemsAmount_DB = new FileActions(db_itemsAmount_path);
+		m_Workers_DB = new FileActions(db_workers);
+		m_Customers_DB = new FileActions(db_customers_path);
+		m_ExistItems_DB = new FileActions(db_items_path);
+		m_PurchaseRecordes_DB = new FileActions(db_purchases_path);
+		m_PurchaseTracks_DB = new FileActions(db_purchasetrack_path);
+		m_UsersFile_DB = new FileActions(db_users_path);
+
+		
+	}
+	public static FilesManager CreateOrGetInstance()
+	{
+		if(m_Instance==null)
+			m_Instance = new FilesManager();
+		
+		return m_Instance;
+	}
+	
+	public void SignUp(Worker i_Worker,String i_Password) throws Exception
+	{
+		JSONObject i_Data = new JSONObject();
+		i_Data.put("workerNumber", i_Worker.getWorkerNumber());
+		i_Data.put("password",i_Password);
+		
+		synchronized(m_UsersFile_DB)
+		{
+			if(m_UsersFile_DB.IsExistsByFields(new String [] {"workerNumber"},new String [] {i_Worker.getWorkerNumber()}))
+				throw new AllReadyExistsException(i_Worker);
+			
+			m_UsersFile_DB.AddToFile(i_Data.toString());
+		}
+	}
+	
+	public Worker SignIn(String i_WorkerNumber, eBrunches i_Brunch, String i_Password) throws Exception
+	{
+		Worker user = null;
+		String password = null;
+		
+		synchronized(m_UsersFile_DB)
+		{
+			password = m_UsersFile_DB.GetFieldValueByFields(new String [] {"workerNumber"},new String [] {i_WorkerNumber}, "password");
+		}
+		
+		if(password != null  && password.compareTo(i_Password)==0)
+		{
+			synchronized(m_Workers_DB)
+			{
+				user = WorkerFactory.CreateWorker(m_Workers_DB.GetJSONObjectByFields(new String [] {"workerNumber"},new String [] {i_WorkerNumber}));
+			}
+		}
+		else
+		{
+			throw new ValidationException("Invalid Parameters!");
+		}
+		
+		return user;
+	}
+	
+	public void AddWorker(Worker i_Worker) throws Exception
+	{
+		synchronized(m_Workers_DB)
+		{
+			i_Worker.setWorkerNumber(String.valueOf(m_Workers_DB.GetCurrentIndexer() + 1));
+			addPerson(m_Workers_DB,i_Worker);
+		}
+	}
+	
+	public void AddCustomer(Customer i_Customer) throws FileNotFoundException, AllReadyExistsException, Exception
+	{
+		synchronized(m_Customers_DB)
+		{
+			addPerson(m_Customers_DB,i_Customer);
+		}
+	}
+	
+	private void addPerson(FileActions i_FileAction,Person i_Person) throws FileNotFoundException, AllReadyExistsException, Exception
+	{
+		if(!i_FileAction.IsExistsByFields(new String [] {"ID"},new String [] {i_Person.getID()}))
+		{
+			i_FileAction.AddToFile(i_Person);
+		}
+		else
+		{
+			throw new AllReadyExistsException(i_Person);
+		}
+		
+	}
+	
+	public void RemoveWorker(Worker i_Worker) throws Exception
+	{
+		synchronized(m_Workers_DB)
+		{
+			removePerson(m_Workers_DB,i_Worker);
+		}
+	}
+	public void RemoveCustomer(Customer i_Customer) throws Exception 
+	{
+		synchronized(m_Customers_DB)
+		{
+			removePerson(m_Customers_DB,i_Customer);
+		}
+	}
+	private void removePerson(FileActions i_FileActions,Person i_Person) throws Exception
+	{
+		i_FileActions.RemoveFromFileByField(new String [] {"ID"}, new String [] {i_Person.getID()});
+	}
+
+	public void IncItemAmount(ItemAmount i_ItemAmount) throws Exception
+	{
+		synchronized(m_ItemsAmount_DB)
+		{
+			try
+			{
+				m_ItemsAmount_DB.IncreaseByField(new String [] {"brunch","itemName"}, new String [] {i_ItemAmount.getBrunch().name(),i_ItemAmount.getItemName().name()}, i_ItemAmount.getAmount());
+			}
+			catch (NotFoundException e)
+			{
+				m_ItemsAmount_DB.AddToFile(i_ItemAmount);
+			}			
+		}
+	}
+
+
+	public JSONArray GetVipCustomers() throws Exception
+	{
+		synchronized(m_Customers_DB)
+		{
+			return m_Customers_DB.GetFileDataByFields(new String [] {"type"},new String [] {"VipCustomer"});
+		}
+	}
+	public JSONArray GetAllExistItems() throws JSONException, IOException
+	{
+		synchronized(m_ExistItems_DB)
+		{
+			return m_ExistItems_DB.GetFileAllData();
+		}
+	}
+	public JSONArray GetItemsAmount(eBrunches i_Brunch) throws Exception
+	{
+		synchronized(m_ItemsAmount_DB)
+		{
+			return m_ItemsAmount_DB.GetFileDataByFields(new String [] {"brunch"},new String [] {i_Brunch.name()});
+		}
+	}
+	
+	public JSONArray GetTodaysSalesReport(eBrunches i_Brunch) throws Exception
+	{
+		return null;
+	}
+	
+	public Purchase CommitPurchaseAndUpdateCustomer(Purchase i_Purchase) throws FileNotFoundException, JSONException,
+	IncompatibleException, IOException, OutOfRangeException, NumberFormatException, IllegalArgumentException, NotFoundException,
+	DeleteFileException, RenameFileException
+	{
+		JSONObject timedJSON;
+		
+		synchronized(m_ItemsAmount_DB)
+		{
+			if(!checkEnoughAmount(i_Purchase.GetCashier().getBranch(),i_Purchase.GetItemsAmount()))
+			{
+				throw new OutOfRangeException("The Items requairs too much amount!");
+			}
+			
+			for(Map.Entry<Integer, ItemAmount> pair: i_Purchase.GetItemsAmount().entrySet())
+			{
+				m_ItemsAmount_DB.DecreaseByField(new String [] {"brunch","itemName"},new String [] {i_Purchase.getBrunch().name(), pair.getValue().getItemName().name()}, pair.getValue().getAmount());
+			}
+		}
+		timedJSON = new JSONObject();
+		
+		for(Map.Entry<Integer, ItemAmount> pair : i_Purchase.GetItemsAmount().entrySet())
+		{
+			timedJSON = pair.getValue().GetJSONObject();
+			timedJSON.put("date",i_Purchase.getDate());
+			synchronized(m_PurchaseRecordes_DB)
+			{
+				m_PurchaseRecordes_DB.AddToFile(timedJSON.toString());
+			}
+		}
+		
+		upgradeCustomerType(i_Purchase);
+		
+		i_Purchase.setTotalBill(GetTotalBill(i_Purchase));
+		
+		return i_Purchase;
+	}
+	
+	public double GetTotalBill(Purchase i_Purchase) throws JSONException, IOException, IncompatibleException, NotFoundException
+	{
+		JSONArray JSONExistItems = null;
+		double discount;
+		double sum = 0;
+		String customerType;
+		Map <Item,Double> itemsPrices = new LinkedHashMap<Item,Double>();
+		
+		if(i_Purchase.GetBuyer() instanceof NewCustomer)
+		{
+			customerType = NewCustomer.class.getSimpleName();
+		}
+		else if(i_Purchase.GetBuyer() instanceof ReturnedCustomer)
+		{
+			customerType = ReturnedCustomer.class.getSimpleName();
+		}
+		else
+		{
+			customerType =  VipCustomer.class.getSimpleName();
+		}
+
+		synchronized(m_PurchaseTracks_DB)//to know the discount of the customer type
+		{
+			discount = Double.parseDouble(m_PurchaseTracks_DB.GetFieldValueByFields(new String [] {"type"}, new String [] {customerType}, "discount"));
+		}
+		
+		synchronized (m_ExistItems_DB)//to know all updated prices
+		{
+			JSONExistItems = m_ExistItems_DB.GetFileAllData();
+		}
+		
+		for(int i=0;i<JSONExistItems.length();i++)//setting all prices in map by the item id
+		{
+			itemsPrices.put(new Item(JSONExistItems.getJSONObject(i)), Double.parseDouble(JSONExistItems.getJSONObject(i).getString("price")));
+		}
+		
+		for(Map.Entry<Integer, ItemAmount> pair : i_Purchase.GetItemsAmount().entrySet())
+		{
+			ItemAmount itemAmount = pair.getValue();
+			sum += itemsPrices.get(itemAmount.GetItem()) * itemAmount.getAmount();
+		}
+		
+		return sum - (sum *discount);//Returning the sum with the discount
+		
+	}
+	private void upgradeCustomerType(Purchase i_Purchase) throws NumberFormatException, JSONException, FileNotFoundException, IllegalArgumentException, IOException, NotFoundException, DeleteFileException, RenameFileException, OutOfRangeException
+	{
+		String newType = null;
+		
+		//checking customer type
+		if(i_Purchase.GetBuyer() instanceof NewCustomer)
+		{
+			newType = ReturnedCustomer.class.getSimpleName();
+		}
+		else if(i_Purchase.GetBuyer() instanceof ReturnedCustomer)
+		{
+			newType = VipCustomer.class.getSimpleName();
+		}
+		
+		if(newType != null)//in case it is new or returned
+		{
+			synchronized(m_Customers_DB)
+			{//upgrading in DB
+				m_Customers_DB.SetField(new String [] {"ID"},new String [] {i_Purchase.GetBuyer().getID()}, "type", newType);
+			}
+		}
+	}
+	private boolean checkEnoughAmount(eBrunches i_Brunch,Map<Integer,ItemAmount> i_Items) throws FileNotFoundException, JSONException, IncompatibleException, IOException
+	{
+		boolean result = true;
+		JSONArray brunchItems = null;
+		ItemAmount currentBrunchItemAmount;
+		
+		brunchItems = m_ItemsAmount_DB.GetFileDataByFields(new String [] {"brunch"},new String [] {i_Brunch.name()});
+
+		for(int i=0;i<brunchItems.length();i++)
+		{
+			currentBrunchItemAmount = new ItemAmount(brunchItems.getJSONObject(i));
+
+			if(i_Items.containsKey(currentBrunchItemAmount.hashCode()) &&
+			   i_Items.get(currentBrunchItemAmount.hashCode()).getAmount() > brunchItems.getJSONObject(i).getInt("amount"))
+			{
+				result =  false;
+				break;
+			}
+		}
+		
+		return result;
+	}
+
+}

@@ -1,0 +1,36 @@
+package UI.Frames;
+
+import java.awt.Toolkit;
+import java.util.Vector;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+
+//TODO:
+public abstract class ButtonMenuFrame extends allFramesBase{
+	
+	
+	public ButtonMenuFrame()
+	{
+		super();
+		createMainPanel();
+	}
+	
+	protected abstract Vector<JButton> getMenuButton();
+	
+	@Override
+	protected final JPanel createMainPanel()
+	{
+		JPanel myMainPanel = new JPanel();
+		
+		for(JButton button : getMenuButton())
+		{
+			
+		}
+		
+		return myMainPanel;
+	}
+
+}

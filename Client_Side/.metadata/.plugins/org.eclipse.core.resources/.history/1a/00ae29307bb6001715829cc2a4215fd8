@@ -1,0 +1,211 @@
+package UI.Frames.Purchase;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.Date;
+
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
+
+import org.json.JSONException;
+
+import Customer.CreateCustomerException;
+import Customer.Customer;
+import Customer.ReturnedCustomer;
+import Items.Item;
+import Items.ItemAmount;
+import Items.eItemsName;
+import Purchase.Purchase;
+import ServerFunctions.FromServerException;
+import ServerFunctions.ServerFunctionExecuter;
+import UI.inputCheck;
+import UI.inputException;
+import UI.superButton;
+import UI.Frames.SendingActionListener;
+import UI.Frames.sendingFrame;
+import Workers.Cashier;
+
+public class purchaseFrame extends sendingFrame{
+
+	private superButton addTocart;
+	private JComboBox<ItemAmount> itemNameComboBox;
+	private JLabel amountLabel;
+	private JTextField amount;
+	private JLabel customerLabel;
+	private JTextField customerId;
+	private superButton getCustomer;
+	private Customer currentCustomer;
+	private Purchase currentPurchase;
+	private JPanel cartPanel;
+	private JScrollPane cartScrollPane;
+	private JLabel totalBillLable;
+	private double totalBill;
+	
+	public purchaseFrame(){
+		super();
+		setVisible();
+		addEvents();
+	}
+	
+	@Override
+	protected JPanel createMainPanel() {
+		JPanel myMainPanel = new JPanel();
+		try
+		{
+			addTocart = new superButton("Add to cart", Color.orange);
+			itemNameComboBox = new JComboBox<ItemAmount>(ServerFunctionExecuter.getInstance().GetItemsAmount(ServerFunctionExecuter.getInstance().GetLoggedInUser().getBranch()));
+			itemNameComboBox.setPreferredSize(new Dimension(60, 25));
+			amountLabel = new JLabel("Amount: ");
+			amount = new JTextField(8);
+			totalBillLable = new JLabel("00.00$");
+			
+			cartPanel = new JPanel();
+			cartScrollPane = new JScrollPane(cartPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+			cartScrollPane.setPreferredSize(new Dimension (240, 140));
+			cartPanel.setPreferredSize(new Dimension (240, 300));
+			
+			customerLabel = new JLabel("Customer id");
+			customerId = new JTextField(4);
+			getCustomer = new superButton("Find customer", Color.orange);
+			
+			myMainPanel.add(customerLabel);
+			myMainPanel.add(customerId);
+			myMainPanel.add(getCustomer);
+			myMainPanel.add(itemNameComboBox);
+			myMainPanel.add(amountLabel);
+			myMainPanel.add(amount);
+			myMainPanel.add(totalBillLable);
+			myMainPanel.add(cartScrollPane);
+			myMainPanel.add(addTocart);
+		}
+		catch (IOException | FromServerException e)
+		{
+			e.printStackTrace();
+		}
+		return myMainPanel;
+	}
+	
+	private void setVisible(){
+		Boolean foundCustomer;
+		if(currentCustomer != null)
+			foundCustomer = true;
+		else
+			foundCustomer = false;
+
+		itemNameComboBox.setVisible(foundCustomer);
+		amountLabel.setVisible(foundCustomer);
+		amount.setVisible(foundCustomer);
+		addTocart.setVisible(foundCustomer);
+		sendButton.setVisible(foundCustomer);
+		cartScrollPane.setVisible(foundCustomer);
+		totalBillLable.setVisible(foundCustomer);
+		customerLabel.setVisible(!foundCustomer);
+		customerId.setVisible(!foundCustomer);
+		getCustomer.setVisible(!foundCustomer);
+	}
+	
+	private void addEvents(){
+		
+		getCustomer.addActionListener(new SendingActionListener() {
+			
+			@Override
+			public void sendAction(ActionEvent e)throws UnknownHostException, IOException, FromServerException, inputException, JSONException, CreateCustomerException {
+				inputCheck.checkId(customerId.getText(), "ID");
+				currentCustomer = ServerFunctionExecuter.getInstance().GetCustomerById(customerId.getText());
+				currentPurchase = new Purchase(currentCustomer, (Cashier)ServerFunctionExecuter.getInstance().GetLoggedInUser(), new Date());
+				setVisible();
+				
+			}
+		});
+		
+		addTocart.addActionListener(new SendingActionListener(){
+
+			@Override
+			public void sendAction(ActionEvent e)throws UnknownHostException, IOException, FromServerException, inputException, JSONException, CreateCustomerException {
+				ItemAmount currentItemAmount;
+				ItemAmount selectedItemAmount;
+				
+				inputCheck.checkAmount(amount.getText());
+				
+				selectedItemAmount = ((ItemAmount)itemNameComboBox.getSelectedItem());
+				currentItemAmount = new ItemAmount(ServerFunctionExecuter.getInstance().GetLoggedInUser().getBranch(),selectedItemAmount.GetItem() , Integer.parseInt(amount.getText()));
+				inputCheck.checkEnoughAmount(currentItemAmount.getAmount(), selectedItemAmount.getAmount());
+				
+				currentPurchase.AddAmount(currentItemAmount);
+				itemNameComboBox.removeItem(itemNameComboBox.getSelectedItem());
+				totalBillLable.setText(ServerFunctionExecuter.getInstance().GetTotalBill(currentPurchase) + "$");
+				JLabel currentLabel = new JLabel(currentItemAmount.getItemName() + ":" + currentItemAmount.getAmount());
+				cartPanel.add(currentLabel);
+				superButton labelRemoveButton = new superButton("Remove", Color.RED);
+				labelRemoveButton.setPreferredSize(new Dimension (200 - currentLabel.getPreferredSize().width,currentLabel.getPreferredSize().height));
+				labelRemoveButton.addActionListener(new SendingActionListener(){
+
+						@Override
+						public void sendAction(ActionEvent e)throws UnknownHostException, IOException, FromServerException, inputException, JSONException, CreateCustomerException {
+							currentPurchase.RemoveFromPurchase(currentItemAmount);
+							totalBill = ServerFunctionExecuter.getInstance().GetTotalBill(currentPurchase);
+							totalBillLable.setText(String.format("%.2f$", totalBill));
+							cartPanel.remove(currentLabel);
+							cartPanel.remove(labelRemoveButton);
+							cartPanel.revalidate();
+							cartPanel.repaint();
+							itemNameComboBox.addItem(selectedItemAmount);
+						}
+					});
+					cartPanel.add(labelRemoveButton);
+					cartPanel.revalidate();
+					cartPanel.repaint();
+			}
+		});
+	}
+
+	@Override
+	protected String getSendButtonName() {
+		return "New purchase";
+	}
+
+	@Override
+	protected SendingActionListener OnSendButtonClicked() {
+		return new SendingActionListener()
+		{
+		      public void sendAction(ActionEvent e) throws UnknownHostException, IOException, FromServerException, inputException
+		      {
+		    	 
+		    	  ServerFunctionExecuter.getInstance().CommitPurchace(currentPurchase);
+		    	  currentPurchase.setTotalBill(i_TotalBill);
+		      }
+		 };
+	}
+
+	@Override
+	protected String getFrameTitle()
+	{
+		return "Add new purchase";
+	}
+
+	@Override
+	protected int getFrameWidth() {
+		return 300;
+	}
+
+	@Override
+	protected int getFrameHeight() {
+		return 300;
+	}
+
+	@Override
+	protected String getOnSuccessMessage()
+	{
+		return currentPurchase.PrintReceipt();
+	}
+}
+
+

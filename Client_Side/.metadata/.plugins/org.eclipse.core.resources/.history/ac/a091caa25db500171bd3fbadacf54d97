@@ -1,0 +1,80 @@
+package UI.Frames.AddRemove;
+
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Vector;
+
+import javax.swing.JButton;
+
+import ServerFunctions.ServerFunctionExecuter;
+import UI.superButton;
+import UI.Frames.ButtonMenuFrame;
+import Workers.Worker;
+
+public class addOrRemoveFrame extends ButtonMenuFrame{
+	
+	private superButton addButton;
+	private superButton removeButton;
+	
+	public addOrRemoveFrame() throws Exception{
+		super();
+		createButtons();
+		setFrame();
+		addEvents();
+	}
+	
+	public void addEvents(){
+		addButton.addActionListener(new ActionListener(){
+	      public void actionPerformed(ActionEvent e){
+	    	  Thread addThread = new Thread(new Runnable(){
+	    		  @Override
+	    		  public void run(){
+	    			  try{
+	    					new RegisterFrame();
+	    			  }
+	    			  catch (Exception e1){
+	    					e1.printStackTrace();
+	    			  }
+	    		  }	  
+	    	  });
+	    	  addThread.start();
+	      }});
+		
+		removeButton.addActionListener(new ActionListener(){
+		      public void actionPerformed(ActionEvent e){
+		    	  Thread removeThread = new Thread(new Runnable(){
+		    		  @Override
+		    		  public void run(){
+		    			  try{
+		    					new removeWorkerFrame();
+		    			  }
+		    			  catch (Exception e1){
+		    					e1.printStackTrace();
+		    			  }
+		    		  }	  
+		    	  });
+		    	  removeThread.start();
+		      }});
+	}
+
+	@Override
+	protected Vector<JButton> getMenuButton() {
+		
+		Vector<JButton> allButtons = new Vector<JButton>();
+		
+		addButton = new superButton("Add",Color.ORANGE);
+		allButtons.add(addButton);
+		removeButton = new superButton("Remove",Color.ORANGE);
+		allButtons.add(removeButton);
+		
+		return null;
+	}
+
+	@Override
+	protected String getFrameTitle() {
+		// TODO Auto-generated method stub
+		return "Add or remove";
+	}
+}
+

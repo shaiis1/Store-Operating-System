@@ -1,0 +1,8 @@
+package Customer;
+
+public enum eCustomers
+{
+	NewCustomer,
+	ReturnedCustomer,
+	VipCustomer;
+}

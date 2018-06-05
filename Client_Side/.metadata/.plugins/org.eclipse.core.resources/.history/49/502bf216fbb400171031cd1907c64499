@@ -1,0 +1,32 @@
+package UI.Frames;
+
+import java.awt.Color;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+public abstract class allFramesBase extends JFrame
+{
+	protected JPanel mainPanel;
+	
+	public allFramesBase()
+	{
+		this.setLocationRelativeTo(rootPane);
+		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		this.setResizable(false);
+		
+		this.setSize(getFrameWidth(), getFrameHeight());
+		this.setTitle(getFrameTitle());
+		mainPanel = getMainPanel();
+		this.setContentPane(mainPanel);
+
+		this.setVisible(true);
+	}
+	
+	protected abstract String getFrameTitle();
+	protected abstract int getFrameWidth();
+	protected abstract int getFrameHeight();
+	protected abstract JPanel createMainPanel();
+	protected abstract JPanel getMainPanel();
+	
+}

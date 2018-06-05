@@ -1,0 +1,107 @@
+package UI.Frames.AddRemove;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import Customer.NewCustomer;
+import ServerFunctions.ServerFunctionExecuter;
+import UI.Frames.allFramesBase;
+import Workers.Worker;
+
+public class newCustomerFrame extends allFramesBase
+	
+	protected JPanel mainPanel;
+
+	protected JTextField firstNameTextField;
+	protected JTextField lastNameTextField;
+	protected JTextField phoneNumberTextField;
+	protected JTextField idTextField;
+	
+	protected JLabel firstNameLabel;
+	protected JLabel lastNameLabel;
+	protected JLabel phoneNumberLabel;
+	protected JLabel idLabel;
+	
+	protected String getFirstName;
+	protected String getLastName;
+	protected String getPhoneNumber;
+	protected String getId;
+
+	
+	public newCustomerFrame(){
+		super();
+		createComponents();
+		setFrame();
+		addEvents();
+	}
+
+	
+	public void createComponents(){
+		firstNameTextField = new JTextField(10);
+		lastNameTextField = new JTextField(10);
+		phoneNumberTextField = new JTextField(8);
+		idTextField = new JTextField(10);
+		
+		firstNameLabel = new JLabel("First name -");
+		lastNameLabel = new JLabel("Last name -");
+		phoneNumberLabel = new JLabel("Phone number -");
+		idLabel = new JLabel("Id number -");
+		
+		addComponentsToMainPanel();
+	}
+	
+	public void addComponentsToMainPanel(){
+		mainPanel.add(firstNameLabel);
+		mainPanel.add(firstNameTextField);
+		mainPanel.add(lastNameLabel);
+		mainPanel.add(lastNameTextField);
+		mainPanel.add(phoneNumberLabel);
+		mainPanel.add(phoneNumberTextField);
+		mainPanel.add(idLabel);
+		mainPanel.add(idTextField);
+	}
+	
+	public void addEvents(){
+		sendButton.addActionListener(new ActionListener(){
+		      public void actionPerformed(ActionEvent e){
+		    	  getFirstName = firstNameTextField.getText();
+		    	  getLastName = lastNameTextField.getText();
+		    	  getPhoneNumber = phoneNumberTextField.getText();
+		    	  getId = idTextField.getText();
+		    	  
+		    	  try{
+		    		  ServerFunctionExecuter.getInstance().AddCustomer(new NewCustomer(getId, getFirstName,getLastName,getPhoneNumber));
+		    	  }
+		    	  catch (Exception e1){
+					e1.printStackTrace();
+		    	  }
+		      }});
+	}
+
+	@Override
+	protected String getFrameTitle()
+	{
+		return "Add new customer";
+	}
+
+	@Override
+	protected int getFrameWidth() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	protected int getFrameHeight() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	protected JPanel getMainPanel() {
+		createComponents();
+		addComponentsToMainPanel();
+		return mainPanel;
+	} //end of addEvents() method
+}

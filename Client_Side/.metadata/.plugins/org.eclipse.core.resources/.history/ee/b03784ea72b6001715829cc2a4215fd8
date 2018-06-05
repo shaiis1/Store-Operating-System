@@ -1,0 +1,89 @@
+package UI.Frames.Purchase;
+
+import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.net.UnknownHostException;
+
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import Customer.eCustomer;
+import ServerFunctions.FromServerException;
+import ServerFunctions.ServerFunctionExecuter;
+import UI.inputCheck;
+import UI.inputException;
+import UI.Frames.AddRemove.SendingActionListener;
+import UI.Frames.AddRemove.sendingFrame;
+
+@SuppressWarnings("serial")
+public class discountFrame extends sendingFrame{
+	
+	private JLabel customerTypeLabel;
+	private JComboBox<eCustomer> customerType;
+	private JLabel discountLabel;
+	private JTextField discountTextField;
+	private eCustomer selectedCustomer;
+	private double newDiscount;
+
+	
+	public discountFrame() throws Exception{
+		super();
+	}
+
+	@Override
+	protected SendingActionListener OnSendButtonClicked() {
+		return new SendingActionListener(){
+		      public void sendAction(ActionEvent e) throws UnknownHostException, IOException, FromServerException, inputException{	
+		    	  selectedCustomer customer = (eCustomer) customerType.getSelectedItem();
+		    	  inputCheck.checkDiscount(discountTextField.getText());
+		    	  double newDiscount = Double.parseDouble(discountTextField.getText());
+		    	  
+		    	  ServerFunctionExecuter.getInstance().ChangePurchaseTrack(customer.name(), discount);
+		      }};
+	}
+
+	@Override
+	protected String getFrameTitle(){
+		return "Change discount";
+	}
+
+	@Override
+	protected int getFrameWidth(){
+		return 300;
+	}
+
+	@Override
+	protected int getFrameHeight(){
+		return 300;
+	}
+
+	@Override
+	protected JPanel createMainPanel(){
+		JPanel myMainPanel = new JPanel();
+		
+		customerTypeLabel = new JLabel("Customer type -");
+		customerType = new JComboBox<eCustomer>(eCustomer.values());
+		discountLabel = new JLabel("Discount % -");
+		discountTextField = new JTextField(3);
+
+		myMainPanel.add(customerTypeLabel);
+		myMainPanel.add(customerType);
+		myMainPanel.add(discountLabel);
+		myMainPanel.add(discountTextField);
+		
+		return myMainPanel;
+	}
+
+	@Override
+	protected String getSendButtonName(){
+		return "Change";
+	}
+
+	@Override
+	protected String getOnSuccessMessage()
+	{
+		return ;
+	}
+}

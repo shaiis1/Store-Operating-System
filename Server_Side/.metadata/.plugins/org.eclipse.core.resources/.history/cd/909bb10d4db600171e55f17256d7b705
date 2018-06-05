@@ -1,0 +1,9 @@
+12
+{"workerNumber":"1","firstName":"Noa","lastName":"Mizrhi","phoneNumber":"0522134932","ID":"1","type":"Seller","branch":"RishonLeZion","password":"123","bankAccountNumber":"1"}
+{"workerNumber":"2","lastName":"Levi","firstName":"Karin","phoneNumber":"0529302944","ID":"2","type":"Cashier","branch":"RishonLeZion","password":"123","bankAccountNumber":"1"}
+{"workerNumber":"3","lastName":"zeavi","firstName":"Moshe","phoneNumber":"0543973112","ID":"3","type":"ShiftManager","branch":"RishonLeZion","password":"123","bankAccountNumber":"1"}
+{"workerNumber":"4","lastName":"TOAV","firstName":"YOAV","password":"321","phoneNumber":"123123123","ID":"4","type":"Seller","branch":"RishonLeZion","bankAccountNumber":"1"}
+{"workerNumber":"8","lastName":"Damari","firstName":"Erez","password":"321","phoneNumber":"0526203399","ID":"5","type":"Cashier","branch":"RishonLeZion","bankAccountNumber":"1"}
+{"workerNumber":"9","lastName":"yossi","firstName":"yossi","password":"432","phoneNumber":"333","ID":"222","type":"Cashier","branch":"RishonLeZion","bankAccountNumber":"1"}
+{"workerNumber":"10","firstName":"haha","lastName":"baba","password":"654321","phoneNumber":"98429304","ID":"432432","type":"Cashier","branch":"RishonLeZion","bankAccountNumber":"1"}
+{"workerNumber":"11","lastName":"bobo","firstName":"jojo","password":"123","phoneNumber":"123","ID":"1233","type":"Cashier","branch":"RishonLeZion"}

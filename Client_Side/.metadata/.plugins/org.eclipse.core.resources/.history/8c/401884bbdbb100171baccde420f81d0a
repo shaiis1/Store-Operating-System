@@ -1,0 +1,73 @@
+package UI.Frames;
+
+import java.awt.Toolkit;
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.Vector;
+
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+
+import org.json.JSONException;
+
+import Customer.CreateCustomerException;
+import ServerFunctions.FromServerException;
+import Workers.CreateWorkerException;
+
+public abstract class tableFrame extends JFrame{
+	
+	private int frameWidth;
+	private int frameHeight;
+	
+	private Vector<String> columnNames;
+	private Vector<Vector<Object>> data;
+	protected JScrollPane mainPanel;
+	private JTable table;
+	private DefaultTableModel modelTable;
+	
+	public tableFrame() throws UnknownHostException, IOException, FromServerException, JSONException, CreateCustomerException, CreateWorkerException{
+		createTable();
+		createMainPanel();
+		setFrame();
+	}
+	
+	private void SetTableData() throws UnknownHostException, IOException, FromServerException, JSONException, CreateCustomerException, CreateWorkerException
+	{
+		columnNames = getColumnsNames();
+		data = getTableData();
+	}
+	
+	protected abstract Vector<Vector<Object>> getTableData() throws UnknownHostException, IOException, FromServerException, JSONException, CreateCustomerException, CreateWorkerException ;
+	protected abstract Vector<String> getColumnsNames();
+
+	protected abstract String GetTitleName();
+	
+	private void setFrameSize(){
+		frameWidth = (int)(Toolkit.getDefaultToolkit().getScreenSize().width * 0.3);
+		frameHeight = (int)(Toolkit.getDefaultToolkit().getScreenSize().height * 0.5);
+	} //end of setFrameSize() method
+	
+	private void setFrame(){
+		setFrameSize();
+		this.setSize(frameWidth, frameHeight);
+		this.setLocationRelativeTo(rootPane);
+		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		this.setResizable(false);
+		this.setContentPane(mainPanel);
+		this.setTitle(GetTitleName());
+		this.setVisible(true);
+	} //end of setFrame() method
+
+	protected void createMainPanel(){
+		mainPanel = new JScrollPane(table);
+	} //end of createMainPanel() method
+	
+	private void createTable() throws UnknownHostException, IOException, FromServerException, JSONException, CreateCustomerException, CreateWorkerException {
+		SetTableData();
+		table = new JTable();
+		modelTable = new DefaultTableModel(data, columnNames);
+		table.setModel(modelTable);
+	} //end of createTable() method
+} //end of tableFrame class

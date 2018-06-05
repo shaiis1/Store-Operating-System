@@ -1,0 +1,10 @@
+package FileAction.GetData;
+
+public class GetAllStringData extends FileActionGetLines
+{
+
+	public GetAllStringData(String i_Path) {
+		super(i_Path);
+	}
+
+}

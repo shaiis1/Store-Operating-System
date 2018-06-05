@@ -1,0 +1,362 @@
+package ServerFunctions;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Vector;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import Customer.CreateCustomerException;
+import Customer.Customer;
+import Customer.CustomerFactory;
+import Customer.VipCustomer;
+import Items.Item;
+import Items.ItemAmount;
+import Items.eItemCategory;
+import Items.eItemsName;
+import NetworkMessage.*;
+import Person.Person;
+import Purchase.Purchase;
+import Purchase.PurchaseTrack;
+import UI.SocketData;
+import Workers.CreateWorkerException;
+import Workers.User;
+import Workers.Worker;
+import Workers.WorkerFactory;
+import Workers.eBranches;
+
+public class ServerFunctionExecuter
+{
+	private final int m_ServerPortNumber = 30000;
+	private int m_ClientPortNumber = 3501;
+	private final ServerSocket m_ClientServerSocket;
+	private final SocketData m_ToServerDataSocket;
+	private SocketData m_FromServerDataSocket;
+	private static ServerFunctionExecuter m_Instance = null;
+	private Worker m_LoggedInUser = null;
+	
+	public static ServerFunctionExecuter getInstance() throws UnknownHostException, IOException
+	{
+		if(m_Instance == null)
+		{
+			m_Instance = new ServerFunctionExecuter();
+		}
+		
+		return m_Instance;
+	}
+	private ServerFunctionExecuter () throws UnknownHostException, IOException
+	{
+		m_ToServerDataSocket = new SocketData(m_ServerPortNumber);					//opening connection to server
+		m_ClientPortNumber = Integer.parseInt(m_ToServerDataSocket.GetFromNetStream().readLine());		//waiting for client server socket port - server waiting for 'true'
+		m_ClientServerSocket = new ServerSocket(m_ClientPortNumber);				//opening server socket in client
+		m_ToServerDataSocket.GetToNetStream().println(true);						//letting the server to connect
+		m_FromServerDataSocket = new SocketData(m_ClientServerSocket.accept());		//server connectd
+	}
+	
+	@SuppressWarnings("deprecation")
+	private ResponseMessage Execute(RequestMessage i_RequestMessage) throws IOException, FromServerException
+	{
+		ResponseMessage responseMessage = null;
+		String line;
+		
+		m_ToServerDataSocket.GetToNetStream().println(i_RequestMessage.GetJSONObject().toString());
+		line = m_ToServerDataSocket.GetFromNetStream().readLine();
+		responseMessage = ResponseMessageFactory.createResponseMessage(new JSONObject(line));
+		
+		System.out.println(responseMessage.GetJSONObject());
+		if(responseMessage.getDataStatus().equals(eDataStatus.Error))
+		{
+			throw new FromServerException((ErrorMessage)responseMessage);
+		}
+		
+		return responseMessage;
+	}
+	
+	public void CloseConnection() throws IOException
+	{
+		m_ToServerDataSocket.GetToNetStream().println(new RequestMessage(eFunctions.CloseConnection,null));
+		m_ToServerDataSocket.GetSocket().close();
+	}
+	
+	//------------------------Users Functions------------------------//
+	public Worker GetLoggedInUser()
+	{
+		return m_LoggedInUser;
+	}
+	
+	public SocketData getFromServerSocketData()
+	{
+		return m_FromServerDataSocket;
+	}
+	
+	public Worker SignIn(String i_WorkerNumber,String i_Password) throws IOException, FromServerException, JSONException, CreateWorkerException
+	{
+		//while SignIn in the server, to server open a socket to the client
+		
+		JSONObject data = new JSONObject();
+		data.put("workerNumber", i_WorkerNumber);
+		data.put("password", i_Password);
+
+		RequestMessage requestMessage = new RequestMessage(eFunctions.SignIn,data);
+		ResponseMessage responseMessage = Execute(requestMessage);
+		m_LoggedInUser = WorkerFactory.CreateWorker(new JSONObject(responseMessage.getData()));
+		
+		return m_LoggedInUser;
+	}
+	
+	public Vector<Worker> GetAllConnectedWorkers() throws IOException, FromServerException, JSONException, CreateWorkerException
+	{	
+		RequestMessage requestMessage = new RequestMessage(eFunctions.GetAllConnectedWorkes,null);
+		ResponseMessage responseMessage = Execute(requestMessage);
+		JSONArray connectedJSONArray = new JSONObject(responseMessage.getData()).getJSONArray("JSONArray");
+		Vector<Worker> allConnectedWorkres = new Vector<Worker>();
+		
+		for(int i=0;i<connectedJSONArray.length();i++)
+		{
+			allConnectedWorkres.add(WorkerFactory.CreateWorker(connectedJSONArray.getJSONObject(i)));
+		}
+		
+		return allConnectedWorkres;
+		
+	}
+	
+	//------------------------Adding Functions------------------------//
+	public void AddWorker(Worker i_Worker,String i_Password) throws IOException, FromServerException
+	{
+		User newWorker = new User(i_Worker,i_Password);
+		RequestMessage requestMessage = new RequestMessage(eFunctions.AddWorker,newWorker.GetJSONObject());
+		Execute(requestMessage);
+	}
+	
+	public void AddCustomer(Customer i_Customer) throws IOException, FromServerException
+	{
+		RequestMessage requestMessage = new RequestMessage(eFunctions.AddCustomer,i_Customer.GetJSONObject());
+		Execute(requestMessage);
+	}
+	
+	//------------------------Removing Functions------------------------//
+	public void RemoveWorker(Worker i_Worker) throws IOException, FromServerException
+	{
+		RequestMessage requestMessage = new RequestMessage(eFunctions.RemoveWorker,i_Worker.GetJSONObject());
+		Execute(requestMessage);
+	}
+	public void RemoveCustomer(Customer i_Customer) throws IOException, FromServerException
+	{
+		RequestMessage requestMessage = new RequestMessage(eFunctions.RemoveCustomer,i_Customer.GetJSONObject());
+		Execute(requestMessage);
+	}
+	
+	//------------------------Items Functions------------------------//
+	public Vector<ItemAmount> GetItemsAmount(eBranches i_Branch) throws IOException, FromServerException
+	{
+		JSONObject data = new JSONObject();
+		data.put("branch", i_Branch);
+		Vector<ItemAmount> toReturn;
+		
+		RequestMessage requestMessage = new RequestMessage(eFunctions.GetItemsAmount,data);
+		ResponseMessage responseMessage = Execute(requestMessage);
+		
+		JSONArray JSONarr = new JSONObject(responseMessage.getData()).getJSONArray("JSONArray");
+		toReturn = new Vector<ItemAmount>();
+		for(int i=0;i<JSONarr.length();i++)
+		{
+			toReturn.add(new ItemAmount(JSONarr.getJSONObject(i)));
+		}
+		
+		return toReturn;
+	}
+	public void IncItemAmount(Item i_Item, eBranches i_Branch,int i_Amount) throws IOException, FromServerException
+	{
+		ItemAmount itemAmount = new ItemAmount(i_Branch,i_Item, i_Amount);
+		RequestMessage requestMessage = new RequestMessage(eFunctions.IncItemAmount,itemAmount.GetJSONObject());
+		Execute(requestMessage);
+	}
+	
+	//------------------------Purchase Functions------------------------//
+	
+	public Vector<PurchaseTrack> GetAllPurchaseTrack() throws IOException, FromServerException
+	{
+		Vector<PurchaseTrack> purchaseTracks = new Vector<PurchaseTrack>();
+		RequestMessage requestMessage = new RequestMessage(eFunctions.GetAllPurchaseTrack,null);
+		ResponseMessage responseMessage = Execute(requestMessage);
+		
+		JSONArray JSONarr = new JSONObject(responseMessage.getData()).getJSONArray("JSONArray");
+		for(int i=0;i<JSONarr.length();i++)
+		{
+			purchaseTracks.add(new PurchaseTrack(JSONarr.getJSONObject(i)));
+		}
+		
+		return purchaseTracks;
+	}
+	public void ChangePurchaseTrack(String i_CustomerType,double i_Discount) throws IOException, FromServerException
+	{
+		
+		PurchaseTrack purchaseTrackToChange = new PurchaseTrack(i_CustomerType,i_Discount);
+		RequestMessage requestMessage = new RequestMessage(eFunctions.GetAllPurchaseTrack,purchaseTrackToChange.GetJSONObject());
+		Execute(requestMessage);
+	}
+	
+	public void CommitPurchace(Purchase purchase) throws IOException, FromServerException
+	{
+		RequestMessage requestMessage = new RequestMessage(eFunctions.CommitPurchase,purchase.GetJSONObject());
+		Execute(requestMessage);
+	}
+	public double GetTotalBill(Purchase purchase) throws IOException, FromServerException
+	{
+		RequestMessage requestMessage = new RequestMessage(eFunctions.GetPurchaseTotalPrice,purchase.GetJSONObject());
+		ResponseMessage responseMessage =  Execute(requestMessage);
+		return new JSONObject(responseMessage.getData()).getDouble("price");
+	}
+	
+	//------------------------Reports Functions------------------------//
+	public Vector<VipCustomer> GetVIPCustomers() throws IOException, FromServerException
+	{
+		Vector<VipCustomer> vipCustomers = null;
+		
+		RequestMessage requestMessage = new RequestMessage(eFunctions.GetVIPCustomers,null);
+		ResponseMessage responseMessage = Execute(requestMessage);
+		
+		JSONArray JSONarr = new JSONObject(responseMessage.getData()).getJSONArray("JSONArray");
+		vipCustomers = new Vector<VipCustomer>();
+		
+		for(int i=0;i<JSONarr.length();i++)
+		{
+			vipCustomers.add(new VipCustomer(JSONarr.getJSONObject(i)));
+		}
+		
+		return vipCustomers;
+	}
+	
+	public Vector<Person> GetAllCustomers() throws JSONException, IOException, FromServerException, CreateCustomerException, CreateWorkerException
+	{
+		return GetAllPerson(eFunctions.GetAllCustomers);
+	}
+	
+	public Vector<Person> GetAllWorkers() throws JSONException, IOException, FromServerException, CreateCustomerException, CreateWorkerException
+	{
+		return GetAllPerson(eFunctions.GetAllWorkers);
+	}
+	
+	public Vector<Person> GetAllPerson(eFunctions i_Function) throws IOException, FromServerException, JSONException, CreateCustomerException, CreateWorkerException
+	{
+		Vector<Person> vectorToReturn = new Vector<Person>();
+		RequestMessage requestMessage = new RequestMessage(i_Function,null);
+		ResponseMessage responseMessage = Execute(requestMessage);
+		
+		JSONArray JSONarr = new JSONObject(responseMessage.getData()).getJSONArray("JSONArray");
+		
+		for(int i=0;i<JSONarr.length();i++)
+		{
+			if(i_Function.equals(eFunctions.GetAllCustomers))
+				vectorToReturn.add(CustomerFactory.CreateCustomer(JSONarr.getJSONObject(i)));
+			else
+				vectorToReturn.add(WorkerFactory.CreateWorker(JSONarr.getJSONObject(i)));
+		}
+		
+		return vectorToReturn;
+	}
+	
+	public Map<eItemCategory,ItemAmount> GetTodaysSalesReportByCategorys(String [] i_Categorys) throws IOException, FromServerException
+	{
+		Map<eItemCategory,ItemAmount> report;
+		ItemAmount current;
+		JSONArray resultJSON;
+		
+		resultJSON = getTodayAllSalesReportBy("itemCategory",i_Categorys);
+		
+		report = new LinkedHashMap<eItemCategory, ItemAmount>();
+		for(int i=0;i<resultJSON.length();i++)
+		{
+			current = new ItemAmount(resultJSON.getJSONObject(i));
+			if(report.containsKey(current.getItemCategory()))
+			{
+				report.get(current.getItemCategory()).setAmount(report.get(current.getItemCategory()).getAmount() + current.getAmount());
+			}
+			else
+			{
+				report.put(current.getItemCategory(), current);
+			}
+		}
+		
+		return report;
+	}
+	public Map<eItemsName,ItemAmount> GetTodaySalesReporyByItemsName(String [] i_ItemsName) throws IOException, FromServerException
+	{	
+		Map<eItemsName,ItemAmount> report;
+		ItemAmount current;
+		JSONArray resultJSON;
+		
+		resultJSON = getTodayAllSalesReportBy("itemName",i_ItemsName);
+
+		report = new LinkedHashMap<eItemsName, ItemAmount>();
+
+		for(int i=0;i<resultJSON.length();i++)
+		{
+			current = new ItemAmount(resultJSON.getJSONObject(i));
+			if(report.containsKey(current.getItemName()))
+			{
+				report.get(current.getItemName()).setAmount(report.get(current.getItemName()).getAmount() + current.getAmount());
+			}
+			else
+			{
+				report.put(current.getItemName(), current);
+			}
+		}
+		
+		return report;
+	}
+	public Map<Customer,Vector<ItemAmount>> GetTodaySalesReporyByBranch(String i_BranchName) throws IOException, FromServerException, JSONException, CreateCustomerException
+	{	
+		Map<Customer,Vector<ItemAmount>> report;
+		ItemAmount currentItemAmount;
+		Customer currentCustomer;
+		JSONArray resultJSON;
+		
+		resultJSON = getTodayAllSalesReportBy("branch",new String [] {i_BranchName});
+		report = new LinkedHashMap<Customer, Vector<ItemAmount>>();
+
+		for(int i=0;i<resultJSON.length();i++)
+		{
+			currentItemAmount = new ItemAmount(resultJSON.getJSONObject(i));
+			currentCustomer = CustomerFactory.CreateCustomer(resultJSON.getJSONObject(i));
+			if(!report.containsKey(currentCustomer))
+			{
+				report.put(currentCustomer, new Vector<ItemAmount>());
+			}
+			report.get(currentCustomer).add(currentItemAmount);
+		}
+		
+		return report;
+	}
+	private JSONArray getTodayAllSalesReportBy(String i_Field,String [] i_Valuse) throws IOException, FromServerException
+	{
+		int i;
+
+		JSONObject data = new JSONObject();
+		JSONArray valuesJSON = new JSONArray();
+		
+		data.put("field", i_Field);
+		
+		if(i_Valuse != null)
+		{
+			for(i=0;i<i_Valuse.length;i++)
+			{
+				valuesJSON.put(i_Valuse[i]);
+			}
+			data.put("values", valuesJSON);
+		}
+		
+		RequestMessage requestMessage = new RequestMessage(eFunctions.GetTotaySalesReport,data);
+		ResponseMessage responseMessage = Execute(requestMessage);
+		
+		return new JSONObject(responseMessage.getData()).getJSONArray("JSONArray");
+	}
+	
+
+}

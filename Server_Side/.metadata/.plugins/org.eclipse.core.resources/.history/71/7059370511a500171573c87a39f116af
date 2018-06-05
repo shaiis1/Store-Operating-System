@@ -1,0 +1,251 @@
+package Server;
+
+import java.io.*;
+import java.net.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Vector;
+
+import javax.xml.bind.ValidationException;
+
+import org.json.*;
+import FilesManeger.*;
+import Items.ItemAmount;
+import NetworkMessage.ErrorMessage;
+import NetworkMessage.RequestMessage;
+import NetworkMessage.ResponseMessage;
+import NetworkMessage.SuccessMessage;
+import NetworkMessage.eFunctions;
+import Purchase.Purchase;
+import Workers.*;
+import Customer.*;
+import FileActions.AllReadyExistsException;
+import FileActions.NotFoundException;
+
+
+public class Server
+{	
+	private Vector<SocketData> m_DataSockets = new Vector<SocketData>();
+	private FileManager m_FileManager;
+	private final ServerSocket m_ServerSocket;
+	
+	public Server(int i_ServerSocketPort) throws IOException
+	{
+		m_FileManager = FileManager.CreateOrGetInstance();
+		m_ServerSocket = new ServerSocket(i_ServerSocketPort);
+	}
+	
+	@Override
+	public void finalize()
+	{
+		if(!m_ServerSocket.isClosed())
+		{
+			try
+			{
+				m_ServerSocket.close();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}	
+		}
+	}
+		
+	public void StartServer() throws IOException
+	{
+		while(true)
+		{
+			final Socket socket = m_ServerSocket.accept();
+			
+			new Thread(new Runnable()
+			{
+				private Worker m_LoggedInUser = null;
+				
+				@SuppressWarnings("deprecation")
+				@Override
+				public void run()
+				{
+					RequestMessage messageFromClient = null;
+
+					ResponseMessage messageToClient;
+					
+					try
+					{
+						SocketData currentSocket = new SocketData(socket);
+						m_DataSockets.add(currentSocket);
+						
+						currentSocket.GetToNetStream().print(true);
+						
+						messageFromClient = new RequestMessage(new JSONObject(currentSocket.GetFromNetStream().readLine()));
+						while(!messageFromClient.getFunction().equals(eFunctions.CloseConnection))
+						{
+							messageToClient = ExecuteFunction(messageFromClient);
+							currentSocket.GetToNetStream().println(messageToClient.GetJSONObject().toString());
+							messageFromClient = new RequestMessage(new JSONObject(currentSocket.GetFromNetStream().readLine()));
+						}
+						
+						socket.close();
+					}
+					catch (IOException e)
+					{
+					}				
+				}
+				
+
+				private ResponseMessage ExecuteFunction(RequestMessage i_ClientRequest)
+				{
+					eFunctions function = i_ClientRequest.getFunction();
+					JSONObject data = i_ClientRequest.getData();
+					JSONObject dataToReturn = null;
+					ResponseMessage messageToReturn = null;
+					
+					try
+					{
+						if(m_LoggedInUser==null && function != eFunctions.SignIn)
+						{
+							
+						}
+						switch(function)
+						{
+							case SignIn			:	m_LoggedInUser = signIn(data);
+													dataToReturn = m_LoggedInUser.GetJSONObject();
+													break;
+							case SignUp			:   signUp(data);
+													break;
+							case AddCustomer	:	addCustomer(data);
+													break;
+							case AddWorker		:	addWorker(data);
+													break;
+							case RemoveWorker 	: 	removeWorker(data);
+													break;
+							case RemoveCustomer :	removeCustomer(data);
+													break;
+							case IncItemAmount	:   incItemAmount(data);
+													break;
+							case GetVIPCustomers:   dataToReturn = getVipCustomers();
+													break;
+							case GetAllExistItems:	dataToReturn = getAllExistItems();
+													break;
+							case GetItemsAmount	:	dataToReturn = getItemsAmount(data);
+													break;
+							case CommitPurchase	:	commitPurchase(data);
+													break;
+							
+							default				:	messageToReturn = new ErrorMessage("No Such Function");
+						}
+					}
+					catch(Exception ex)
+					{
+						messageToReturn = new ErrorMessage(ex.getMessage());
+					}
+					finally
+					{
+						if(messageToReturn == null)
+						{
+							if(dataToReturn==null)
+							{
+								messageToReturn = new SuccessMessage(null);
+							}
+							else
+							{
+								messageToReturn = new SuccessMessage(dataToReturn.toString());
+							}
+						}
+					}
+					
+					return messageToReturn;
+				}
+
+				private void signUp(JSONObject i_Data) throws Exception
+				{
+					if(i_Data == null)
+					{
+						throw new JSONException("bad JSON");
+					}
+					Worker new_user = WorkerFactory.CreateWorker(i_Data.getJSONObject("worker"));
+					String password = i_Data.getString("password");
+					
+					m_FileManager.SignUp(new_user, password);
+				}
+
+				private Worker signIn(JSONObject data) throws ValidationException, JSONException, CreateWorkerException, NotFoundException, AllReadyExistsException
+				{
+					if(m_LoggedInUser != null)
+						throw new AllReadyExistsException(m_LoggedInUser);
+					
+					return m_FileManager.SignIn(data.getString("workerNumber"), data.getEnum(eBrunches.class, "brunch"), data.getString("password"));
+
+				}
+
+				private void commitPurchase(JSONObject data) throws Exception
+				{
+					Purchase purchase = new Purchase(data);	
+					
+					m_FileManager.CommitPurchase(purchase);
+				}
+
+				private JSONObject getItemsAmount(JSONObject data) throws FileNotFoundException {
+					eBrunches brunch = data.getEnum(eBrunches.class, "brunch");
+					return m_FileManager.GetItemsAmount(brunch);
+				}
+
+				private JSONObject getAllExistItems() throws FileNotFoundException
+				{
+					return m_FileManager.GetAllExistItems();
+				}
+
+				private JSONObject getVipCustomers() throws FileNotFoundException
+				{
+					return m_FileManager.GetVipCustomers();
+				}
+
+				private void addWorker(JSONObject i_Worker) throws Exception
+				{
+					Worker worker = WorkerFactory.CreateWorker(i_Worker);
+					m_FileManager.AddWorker(worker);
+				}
+				
+				private void removeWorker(JSONObject i_Worker) throws Exception
+				{
+					Worker worker = WorkerFactory.CreateWorker(i_Worker);
+					m_FileManager.RemoveWorker(worker);
+				}
+				
+				private void addCustomer(JSONObject i_Customer) throws Exception
+				{
+					
+					Customer customer = CustomerFactory.CreateCustomer(i_Customer);
+					m_FileManager.AddCustomer(customer);
+					if(customer instanceof VipCustomer)
+					{
+						updateNewVipCustomer(customer);
+					}
+				}
+				
+				private void updateNewVipCustomer(Customer customer)
+				{
+					for(SocketData socket : m_DataSockets)
+					{
+						if(socket.GetSocket().isConnected())
+						{
+							socket.GetToNetStream().println((new RequestMessage(eFunctions.UpdateNewVipCustomer,customer.GetJSONObject()).GetJSONObject().toString()));
+						}
+					}
+					
+				}
+
+				private void removeCustomer(JSONObject i_Customer) throws Exception
+				{
+					Customer customer = CustomerFactory.CreateCustomer(i_Customer);
+					m_FileManager.RemoveCustomer(customer);
+				}
+
+				private void incItemAmount(JSONObject i_Data) throws Exception
+				{
+					ItemAmount itemAmount = new ItemAmount(i_Data);
+					m_FileManager.IncItemAmount(itemAmount);
+				}
+			}).start();
+		}
+	}
+}

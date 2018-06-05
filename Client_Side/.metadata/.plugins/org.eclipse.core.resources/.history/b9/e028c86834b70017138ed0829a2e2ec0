@@ -1,0 +1,144 @@
+package UI.Frames.AddRemove;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.net.UnknownHostException;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SpringLayout;
+
+import Customer.Customer;
+import Customer.NewCustomer;
+import ServerFunctions.FromServerException;
+import ServerFunctions.ServerFunctionExecuter;
+import UI.Popups;
+import UI.inputCheck;
+import UI.inputException;
+import UI.superButton;
+import UI.Frames.SendingActionListener;
+import UI.Frames.sendingFrame;
+
+@SuppressWarnings("serial")
+public class addNewCustomerFrame extends sendingFrame
+{
+	protected JTextField firstNameTextField;
+	protected JTextField lastNameTextField;
+	protected JTextField phoneNumberTextField;
+	protected JTextField idTextField;
+	
+	protected JLabel firstNameLabel;
+	protected JLabel lastNameLabel;
+	protected JLabel phoneNumberLabel;
+	protected JLabel idLabel;
+	
+	protected String getFirstName;
+	protected String getLastName;
+	protected String getPhoneNumber;
+	protected String getId;
+	
+	private Customer newCustomer;
+	
+	public addNewCustomerFrame(){
+		super();
+	}
+
+	@Override
+	protected String getFrameTitle(){
+		return "Add new customer";
+	}
+
+	@Override
+	protected int getFrameWidth(){
+		return (int)(Toolkit.getDefaultToolkit().getScreenSize().width * 0.2);
+	}
+	
+	@Override
+	protected int getFrameHeight(){
+		return (int)(Toolkit.getDefaultToolkit().getScreenSize().height * 0.35);
+	}
+
+	@Override
+	protected JPanel createMainPanel()
+	{
+		SpringLayout spring = new SpringLayout();
+		JPanel myMainPanel = new JPanel();
+		Container contentPane = this.getContentPane();
+		firstNameTextField = new JTextField(10);
+		lastNameTextField = new JTextField(10);
+		phoneNumberTextField = new JTextField(8);
+		idTextField = new JTextField(10);
+		sendButton = new superButton("send", Color.orange);
+		
+		firstNameLabel = new JLabel("First name -");
+		lastNameLabel = new JLabel("Last name -");
+		phoneNumberLabel = new JLabel("Phone number -");
+		idLabel = new JLabel("Id number -");
+
+		addToContent(firstNameLabel, firstNameTextField, contentPane,spring);
+		//addToContent(firstNameLabel, firstNameTextField, contentPane,spring);
+		//addToContent(firstNameLabel, firstNameTextField, contentPane,spring);
+		//addToContent(firstNameLabel, firstNameTextField, contentPane,spring);
+		//spring.putConstraint(SpringLayout.WEST, firstNameLabel, 10, SpringLayout.EAST, firstNameTextField);
+		//myMainPanel.add(firstNameLabel);
+		//myMainPanel.add(firstNameTextField);
+		spring.putConstraint(SpringLayout.WEST, lastNameLabel, 10, SpringLayout.EAST, lastNameTextField);
+	//	myMainPanel.add(lastNameLabel);
+		//myMainPanel.add(lastNameTextField);
+		spring.putConstraint(SpringLayout.WEST, phoneNumberLabel, 10, SpringLayout.EAST, phoneNumberTextField);
+		//myMainPanel.add(phoneNumberLabel);
+		//myMainPanel.add(phoneNumberTextField);
+		spring.putConstraint(SpringLayout.WEST, idLabel, 10, SpringLayout.EAST, idTextField);
+		//myMainPanel.add(idLabel);
+		//myMainPanel.add(idTextField);
+		contentPane.setLayout(spring);
+		myMainPanel.add(contentPane);
+		return myMainPanel;
+	}
+	private void addToContent(Component left, Component right, Container contentPane, SpringLayout layout){
+		contentPane.add(left);
+	    contentPane.add(right);
+	    layout.putConstraint(SpringLayout.WEST, left, 10, SpringLayout.WEST, contentPane);
+	    layout.putConstraint(SpringLayout.NORTH, left, 25, SpringLayout.NORTH, contentPane);
+	    layout.putConstraint(SpringLayout.NORTH, right, 25, SpringLayout.NORTH, contentPane);
+	    layout.putConstraint(SpringLayout.WEST, right, 20, SpringLayout.EAST, left);
+	}
+
+
+	@Override
+	protected SendingActionListener OnSendButtonClicked() {
+		return new SendingActionListener()
+		{
+		      public void sendAction(ActionEvent e) throws UnknownHostException, IOException, FromServerException, inputException
+		      {
+		    	  getFirstName = firstNameTextField.getText();
+		    	  getLastName = lastNameTextField.getText();
+		    	  inputCheck.checkName(getFirstName + getLastName);
+		    	  
+		    	  getPhoneNumber = phoneNumberTextField.getText();
+		    	  inputCheck.checkPhone(getPhoneNumber);
+		    	  
+		    	  getId = idTextField.getText();
+		    	  inputCheck.checkId(getId, "Id");
+		    	  
+		    	  newCustomer = new NewCustomer(getId, getFirstName,getLastName,getPhoneNumber);
+		    	  ServerFunctionExecuter.getInstance().AddCustomer(newCustomer);
+		    	  
+		      }
+		 };
+	}
+	@Override
+	protected String getSendButtonName() {
+		return "Add";
+	}
+
+	@Override
+	protected String getOnSuccessMessage() {
+		return String.format("%s added Successfuly!", newCustomer.toString());
+	}
+}

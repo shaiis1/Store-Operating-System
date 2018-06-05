@@ -1,0 +1,53 @@
+package UI.Frames.AddRemove;
+
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import UI.Popups;
+import UI.superButton;
+import UI.Frames.allFramesBase;
+
+@SuppressWarnings("serial")
+public abstract class sendingFrame extends allFramesBase
+{
+	protected superButton sendButton;
+	
+	public sendingFrame()
+	{
+		super();
+		
+		sendButton = new superButton(getSendButtonName(),Color.orange);
+		addOnSendButtonClicked();
+		
+		super.getMainPanel().add(sendButton);
+	}
+	
+	private void disposeFrame()
+	{
+		this.dispose();
+	}
+	
+	protected abstract String getSendButtonName();
+	public void addOnSendButtonClicked()
+	{
+		sendButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				SendingActionListener fucntion = OnSendButtonClicked();
+				fucntion.actionPerformed(null);
+				if(fucntion.isSucceed())
+				{
+					Popups.ShowSuccess(getOnSuccessMessage());
+					disposeFrame();
+				}
+				
+			}
+
+		});
+	}
+	protected abstract String getOnSuccessMessage() 
+	protected abstract SendingActionListener OnSendButtonClicked();
+}

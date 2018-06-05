@@ -1,0 +1,517 @@
+package UI.Panels;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Vector;
+
+import javax.swing.BorderFactory;
+import javax.swing.ComboBoxEditor;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import ChatMessage.ChatMessage;
+import NetworkMessage.RequestMessage;
+import ServerFunctions.FromServerException;
+import ServerFunctions.ServerFunctionExecuter;
+import ServerFunctions.SocketData;
+import UI.Popups;
+import UI.superButton;
+import UI.Frames.All.AllCustomersFrame;
+import UI.Frames.Invetory.inventoryFrame;
+import Workers.CreateWorkerException;
+import Workers.Worker;
+import Workers.WorkerFactory;
+
+
+@SuppressWarnings("serial")
+public abstract class WorkerPanel extends MainPanel{
+
+	private JLabel helloWorkerLable;
+	
+	private JLabel chooseForChatLable;
+	private superButton checkInventoryButton;
+	private superButton allCustomersButton;
+	private superButton logOutButton;
+	private superButton newLogsButton;
+	private superButton sendMessageButton;
+	private JTable chatTable;
+	private JPanel chatPanel;
+	private JTextField messageTextField;
+	private JComboBox<Worker> connectedWorkersComboBox;
+	private Map<Worker,DefaultTableModel> allChatsMessages;
+
+	private final DateFormat m_DateFormat = new SimpleDateFormat("HH:mm:ss");
+
+	
+	public WorkerPanel(int panelWidth,int panelHeight)
+	{
+		super(panelWidth,panelHeight);
+	}
+
+	public void StartChat()
+	{
+		try
+		{
+			final SocketData fromServer = ServerFunctionExecuter.getInstance().getFromServerSocketData();
+			
+			new Thread(new Runnable()
+			{
+				@SuppressWarnings("deprecation")
+				@Override
+				public void run()
+				{
+					while(true)
+					{
+						try 
+						{
+							final RequestMessage requestMessage = new RequestMessage(new JSONObject(fromServer.GetFromNetStream().readLine()));
+							
+							new Thread(new Runnable()
+							{
+								@Override
+								public void run()
+								{
+									switch(requestMessage.getFunction())
+									{
+										case NewConnectedUser	:	addNewUserToUsersCombobox(requestMessage.getData());
+																	break;
+										case RemoveConnectedUser:	removeUserFromUsersComboBox(requestMessage.getData());
+																	break;
+										case SendMessage		:	addMessage(requestMessage.getData());
+										default:					break;
+									}
+								}
+								
+								//On getting a message from user
+								private void addMessage(JSONObject data)
+								{
+									try
+									{
+										ChatMessage chatMessage = new ChatMessage(data);
+										addMessageToTable(chatMessage.GetSender(), chatMessage.GetSender(), chatMessage.getMessage());	
+									}
+									catch (JSONException | CreateWorkerException e)
+									{
+										Popups.ShowError("Problem on loading message from net:\n "+e.getMessage());
+									}
+								}
+								
+								//On user disconnected
+								private void removeUserFromUsersComboBox(JSONObject i_Data)
+								{
+									try
+									{
+										Worker user = WorkerFactory.CreateWorker(i_Data);
+										connectedWorkersComboBox.removeItem(user);
+										if(chatTable.getModel().equals(allChatsMessages.get(user)))
+										{
+											if(allChatsMessages.size()==1)
+												chatTable.setModel(null);
+											else
+												chatTable.setModel(dataModel);
+										}
+										allChatsMessages.remove(user);
+
+									} 
+									catch (CreateWorkerException e)
+									{
+										Popups.ShowError("Problem on removing disconnected user:\n "+e.getMessage());
+									}
+									
+								}
+								
+								//On user connected
+								private void addNewUserToUsersCombobox(JSONObject i_Data)
+								{
+									try
+									{
+										String title;
+										Worker user = WorkerFactory.CreateWorker(i_Data);
+										connectedWorkersComboBox.addItem(user);
+
+										
+										if(!allChatsMessages.containsKey(user))
+										{
+											title = String.format("Chat with %s %s!",user.getFirstName(),user.getLastName());
+											allChatsMessages.put(user, new DefaultTableModel(new Object [] {title},0));
+											allChatsMessages.get(user).addRow(new Object [] {title});
+										}
+									}
+									catch (CreateWorkerException e)
+									{
+										Popups.ShowError("Problem on adding new connected user:\n "+e.getMessage());
+									}
+								}
+							}).start();
+						}
+						catch (JSONException e)
+						{
+							Popups.ShowError("Problem on getting update from net:\n "+e.getMessage());
+						}
+						catch(IOException e)
+						{
+							Popups.ServerConnectionError(e.getMessage());
+						}
+					}
+				}
+			}).start();
+		}	
+		catch (IOException e)
+		{
+			Popups.ShowError("Problem on opening connection to the server!:\n "+e.getMessage());
+		}
+
+	}
+	
+	public superButton getLogOutButton(){
+		return logOutButton;
+	} //end of getLogOutButton() method
+	
+	private void addMessageToTable(Worker i_Sender,Worker i_Reciver,String i_Message)
+	{
+		String timedLable;
+		
+		timedLable = String.format("[%s]: %s %s",m_DateFormat.format(Calendar.getInstance().getTime()),i_Sender.getFirstName(),i_Sender.getLastName());
+		allChatsMessages.get(i_Reciver).addRow(new Object [] {timedLable});
+		allChatsMessages.get(i_Reciver).addRow(new Object [] {i_Message});
+		
+		chatTable.setModel(allChatsMessages.get(i_Reciver));
+		connectedWorkersComboBox.setSelectedItem(i_Reciver);
+	}
+	
+	
+	//-----------Creating Components-------------	
+	@Override
+	protected void createComponents()
+	{
+		createChatPanel();
+		createConnectedUsersComboBox();
+		createAllLables();
+		createAllButtons();
+		createAllTextFields();
+	} //end of createComponents() method
+	
+	private void createChatPanel()
+	{
+		chatTable = new JTable();
+		chatPanel = new JPanel();
+		chatPanel.add(chatTable);
+		chatPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(c_Orange, 5, false), "Chat",0,0,new Font("Tahoma", 0, 13),c_Orange));
+		chatTable.setPreferredSize(new Dimension((int)(centerWidth * 0.91),(int)(centerHeight * 0.8)));
+		chatTable.setBackground(c_Gray);
+		chatPanel.setBackground(c_Gray);
+
+		class ChatTableCellRenderer extends DefaultTableCellRenderer//implements TableCellRenderer
+		{
+			public Component getTableCellRendererComponent(JTable table, Object value,boolean isSelected,boolean hasFocus, int row,int col)
+			{
+				Component c = super.getTableCellRendererComponent(table,value,isSelected,hasFocus,row,col);
+				c.setFont(new Font("Lucida Sans Unicode", Font.BOLD, 10));
+				
+				if(row==0)
+				{
+					c.setBackground(Color.BLACK);
+					c.setForeground(Color.WHITE);
+
+				}
+				else if(row%2 == 0)
+				{
+					c.setForeground(Color.BLACK);
+				}
+				else
+				{
+					try
+					{
+						if(table.getValueAt(row, col).toString().contains(ServerFunctionExecuter.getInstance().GetLoggedInUser().getFirstName() + " " + ServerFunctionExecuter.getInstance().GetLoggedInUser().getLastName()))
+						{
+							c.setBackground(c_Blue);
+						}
+						else
+						{
+							c.setBackground(c_Red);
+						}
+					} 
+					catch (IOException e)
+					{
+						Popups.ServerConnectionError(e.getMessage());
+					}
+				}
+				return c;
+			}
+		}
+		
+		chatTable.setDefaultRenderer(Object.class, new ChatTableCellRenderer());
+	}
+
+	private void createConnectedUsersComboBox()
+	{
+		Vector<Worker> allConnectedUsers;
+		try
+		{
+			allChatsMessages = new LinkedHashMap<Worker,DefaultTableModel>();
+			allConnectedUsers = ServerFunctionExecuter.getInstance().GetAllConnectedWorkers();
+			connectedWorkersComboBox = new JComboBox<Worker>(allConnectedUsers);
+			
+			for(Worker user : allConnectedUsers)
+			{
+				String title = String.format("Chat with %s %s!",user.getFirstName(),user.getLastName());
+				allChatsMessages.put(user, new DefaultTableModel(new Object [] {title},0));
+				allChatsMessages.get(user).addRow(new Object [] {title});
+			}
+			
+			connectedWorkersComboBox.setPreferredSize(new Dimension((int)(centerWidth*0.7), 20));
+			connectedWorkersComboBox.setBackground(c_LightGray);
+			connectedWorkersComboBox.setForeground(c_Orange);
+		}
+		catch (FromServerException fsex)
+		{
+			fsex.ShowPopup();
+		}
+		catch (JSONException | CreateWorkerException e)
+		{
+			Popups.ShowError("Error with the data from server!\n"+e.getMessage());
+		}
+		catch(IOException ioex)
+		{
+			Popups.ServerConnectionError(ioex.getMessage());
+		}
+		
+	}
+	
+	private void createAllLables()
+	{
+		createUserInfo();
+		chooseForChatLable = new JLabel("Choose user");
+		chooseForChatLable.setForeground(c_Orange);
+	}
+	
+	private void createUserInfo()
+	{
+		Worker user;
+		try
+		{
+			user = ServerFunctionExecuter.getInstance().GetLoggedInUser();
+			
+			String message = String.format("<html>Hello %s %s<br>Worker number %s<br>Phone number %s<br>From %s", user.getFirstName(),user.getLastName(),user.getWorkerNumber(),user.getPhoneNumber(),user.getBranch().name());
+
+			helloWorkerLable = new JLabel(message,SwingConstants.CENTER);
+			helloWorkerLable.setForeground(c_Orange);
+			helloWorkerLable.setFont(new Font("Tahoma",1 , 9));
+		}
+		catch (IOException e)
+		{
+			Popups.ServerConnectionError(e.getMessage());
+		}
+
+	}
+	
+	private void createAllButtons()
+	{
+		checkInventoryButton = new superButton("Check inventory",c_Orange);
+		allCustomersButton = new superButton("Customers list",c_Orange);
+		newLogsButton = new superButton("New Logs",c_Orange);
+		logOutButton = new superButton("Log out",c_Red);
+		
+		sendMessageButton = new superButton("Send",c_Green);
+		sendMessageButton.setPreferredSize(new Dimension((int)(centerWidth*0.25), 25));
+		sendMessageButton.setBackground(c_Green);
+		
+		logOutButton.setBackground(c_Red);
+	}
+	
+	private void createAllTextFields()
+	{
+		messageTextField = new JTextField();
+		messageTextField.setPreferredSize(new Dimension((int)(centerWidth*0.65), 20));
+		messageTextField.setBackground(c_LightGray);
+		messageTextField.setForeground(c_Orange);
+		messageTextField.setBorder(BorderFactory.createLineBorder(c_Orange));
+	}
+	
+	
+	@Override
+	protected void attachToPanels()
+	{
+		upLeftPanel.add(helloWorkerLable);
+		upRightPanel.add(logOutButton);
+		
+		centerPanel.add(chooseForChatLable);
+		centerPanel.add(connectedWorkersComboBox);
+		centerPanel.add(chatPanel);
+		centerPanel.add(messageTextField);
+		centerPanel.add(sendMessageButton);
+
+		leftPanel.add(checkInventoryButton);
+		leftPanel.add(allCustomersButton);
+		leftPanel.add(newLogsButton);
+
+	}
+	
+	//-----------Events-------------	
+	@Override
+	protected void addEvents() 
+	{
+		addOnSendMessageButtonClicked();
+		addOnCheckInventoryButtonClicked();
+		addOnAllCustomersButtonClicked();
+		addOnConnectedWorkersComboBoxSelectedChange();
+		addOnLogsButtonClicked();
+	} //end of addEvents() method
+	
+	private void addOnSendMessageButtonClicked()
+	{
+		sendMessageButton.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				if(!messageTextField.getText().isEmpty())
+				{
+					if(connectedWorkersComboBox.getSelectedIndex() != -1)
+					{
+						try
+						{
+							//getting data
+							Worker reciver = (Worker)connectedWorkersComboBox.getSelectedItem();
+							Worker sender = ServerFunctionExecuter.getInstance().GetLoggedInUser();
+							String message = messageTextField.getText();
+							
+							//sending chat message
+							ServerFunctionExecuter.getInstance().SendMessage(reciver, message);
+							
+							//updating table
+							addMessageToTable(sender,reciver,message);
+							
+							//clear message text field
+							messageTextField.setText("");
+							
+						}
+						catch(FromServerException fsex)
+						{
+							fsex.ShowPopup();
+						}
+						catch (IOException ex)
+						{
+							Popups.ShowError("Problem trying to connect the server!\n"+ex.getMessage());
+						}
+					}
+					else
+					{
+						Popups.ShowWarning("You must select who to send to");
+						connectedWorkersComboBox.requestFocus();
+					}
+				}
+				else
+				{
+					Popups.ShowWarning("You must enter a message!");
+					messageTextField.requestFocus();
+				}
+				
+			}
+		});
+	}
+	
+	private void addOnCheckInventoryButtonClicked()
+	{
+		checkInventoryButton.addActionListener(new ActionListener(){
+		      public void actionPerformed(ActionEvent e){
+		    	  Thread inventoryThread = new Thread(new Runnable(){
+		    		  @Override
+		    		  public void run(){
+		    			  try{
+		    					new inventoryFrame();
+		    			  } 
+		    			  catch (Exception e1){
+		    					e1.printStackTrace();
+		    			  }
+		    		  }	//end of run() method  
+		    	  }); //end of Runnable() class and Thread declaration
+		    	  inventoryThread.start();
+		      } //end of actionPerformed(ActionEvent) method
+		    }); //end of ActionListener() class and the adding of it
+	}
+	
+	private void addOnAllCustomersButtonClicked()
+	{
+		allCustomersButton.addActionListener(new ActionListener(){
+		      public void actionPerformed(ActionEvent e){
+		    	  Thread customersThread = new Thread(new Runnable(){
+		    		  @Override
+		    		  public void run(){
+		    			  try{
+		    					new AllCustomersFrame();
+		    			  } 
+		    			  catch (Exception e1){
+		    					e1.printStackTrace();
+		    			  }
+		    		  }	//end of run() method   
+		    	  }); //end of Runnable() class and Thread declaration
+		    	  customersThread.start();
+		      } //end of actionPerformed(ActionEvent) method
+		    });	//end of ActionListener() class and the adding of it	
+	}
+	
+	private void addOnConnectedWorkersComboBoxSelectedChange()
+	{
+		connectedWorkersComboBox.addActionListener (new ActionListener () {
+		    public void actionPerformed(ActionEvent e)
+		    {
+		    	if(allChatsMessages.containsKey(connectedWorkersComboBox.getSelectedItem()))
+		    	{
+		    		chatTable.setModel(allChatsMessages.get(connectedWorkersComboBox.getSelectedItem()));
+		    	}
+		    }
+		});
+		
+	}
+
+	private void addOnLogsButtonClicked()
+	{
+		newLogsButton.addActionListener(new ActionListener(){
+		      public void actionPerformed(ActionEvent e){
+		    	  Thread logsThread = new Thread(new Runnable(){
+		    		  @Override
+		    		  public void run(){
+		    			  try{
+		    					//new logsFrame(localMfunc);
+		    			  } 
+		    			  catch (Exception e1){
+		    					e1.printStackTrace();
+		    			  }
+		    		  }	//end of run() method  
+		    	  }); //end of Runnable() class and Thread declaration
+		    	  logsThread.start();
+		      } //end of actionPerformed(ActionEvent) method
+		    });	//end of ActionListener() class and the adding of it
+		
+	}
+} //end of WorkerPanel() class
+
+
+
+
+
+
+
+
+
+
+	

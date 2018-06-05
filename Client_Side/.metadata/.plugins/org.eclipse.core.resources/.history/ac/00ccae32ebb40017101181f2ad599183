@@ -1,0 +1,103 @@
+package UI.Frames;
+
+import java.awt.Color;
+import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+
+import ServerFunctions.FromServerException;
+import ServerFunctions.ServerFunctionExecuter;
+import UI.Panels.panelsManager;
+
+public class MainFrame extends allFramesBase
+{
+	private int frameWidth = (int)(Toolkit.getDefaultToolkit().getScreenSize().width * 0.4);
+	private int frameHeight = (int)(Toolkit.getDefaultToolkit().getScreenSize().height * 0.8);
+	
+	private panelsManager mainPanel;
+	
+	public MainFrame() throws Exception
+	{
+		createMainPanel();
+		setFrame();
+	}
+	
+	
+	private void createMainPanel() throws Exception
+	{
+		mainPanel = new panelsManager(frameWidth,frameHeight);
+	}
+	
+	private void setFrame()
+	{
+		this.setSize(frameWidth, frameHeight);
+		this.setLocationRelativeTo(null);
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setResizable(false);
+		this.setContentPane(mainPanel);
+		this.setVisible(true);
+		
+
+		this.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e)
+			{
+				try
+				{
+					if(ServerFunctionExecuter.getInstance().GetLoggedInUser()!=null)
+					{
+						ServerFunctionExecuter.getInstance().SignOut();
+					}
+				}
+				catch (IOException | FromServerException e1)
+				{
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+
+
+		
+		
+	}
+
+
+	@Override
+	protected String getFrameTitle()
+	{
+		return "Store operating system";
+	}
+
+
+	@Override
+	protected int getFrameWidth() {
+		return (int)(Toolkit.getDefaultToolkit().getScreenSize().width * 0.4);
+	}
+
+
+	@Override
+	protected int getFrameHeight() {
+		frameWidth = (int)(Toolkit.getDefaultToolkit().getScreenSize().height * 0.8)
+		return ;
+	}
+
+
+	@Override
+	protected JPanel getMainPanel() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	protected Color getBackgroundColor() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+}

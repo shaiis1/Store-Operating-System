@@ -1,0 +1,75 @@
+package UI.Frames.AddRemove;
+
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import ServerFunctions.ServerFunctionExecuter;
+import UI.buttonedInterface;
+import UI.superButton;
+import UI.Frames.ButtonMenuFrame;
+import Workers.Worker;
+
+public class addOrRemoveFrame extends ButtonMenuFrame{
+	
+	private superButton addButton;
+	private superButton removeButton;
+	
+	public addOrRemoveFrame() throws Exception{
+		super();
+		createButtons();
+		setFrame();
+		addEvents();
+	}
+	
+	@Override
+	protected void setFrame(){
+		this.setTitle("Add or remove");
+		super.setFrame();
+	}
+	
+	public void createButtons(){
+		addButton = new superButton("Add",Color.ORANGE);
+		removeButton = new superButton("Remove",Color.ORANGE);
+		addButtonsToPanel();
+	}
+	
+	public void addButtonsToPanel(){
+		mainPanel.add(addButton);
+		mainPanel.add(removeButton);
+	}
+	public void addEvents(){
+		addButton.addActionListener(new ActionListener(){
+	      public void actionPerformed(ActionEvent e){
+	    	  Thread addThread = new Thread(new Runnable(){
+	    		  @Override
+	    		  public void run(){
+	    			  try{
+	    					new RegisterFrame();
+	    			  }
+	    			  catch (Exception e1){
+	    					e1.printStackTrace();
+	    			  }
+	    		  }	  
+	    	  });
+	    	  addThread.start();
+	      }});
+		
+		removeButton.addActionListener(new ActionListener(){
+		      public void actionPerformed(ActionEvent e){
+		    	  Thread removeThread = new Thread(new Runnable(){
+		    		  @Override
+		    		  public void run(){
+		    			  try{
+		    					new removeWorkerFrame();
+		    			  }
+		    			  catch (Exception e1){
+		    					e1.printStackTrace();
+		    			  }
+		    		  }	  
+		    	  });
+		    	  removeThread.start();
+		      }});
+	}
+}
+

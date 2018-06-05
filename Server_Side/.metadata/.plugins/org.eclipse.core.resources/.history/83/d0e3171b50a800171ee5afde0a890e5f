@@ -1,0 +1,12 @@
+package Purchase;
+
+import org.json.JSONAble;
+
+public class PurchaseRecorde extends JSONAble
+{
+	
+	public PurchaseRecorde()
+	{
+		
+	}
+}

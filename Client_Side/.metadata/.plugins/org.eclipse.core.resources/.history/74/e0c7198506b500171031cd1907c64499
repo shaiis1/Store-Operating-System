@@ -1,0 +1,98 @@
+package UI.Frames.Purchase;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import Customer.eCustomer;
+import ServerFunctions.FromServerException;
+import ServerFunctions.ServerFunctionExecuter;
+import UI.Popups;
+import UI.Frames.AddRemove.SendingActionListener;
+import UI.Frames.AddRemove.sendingFrame;
+
+public class discountFrame extends sendingFrame{
+	
+	private JLabel customerTypeLabel;
+	private JComboBox customerType;
+	private JLabel discountLabel;
+	private JTextField discountTextField;
+
+	
+	public discountFrame() throws Exception
+	{
+		super();
+	}
+
+
+	@Override
+	protected SendingActionListener OnSendButtonClicked() {
+		// TODO Auto-generated method stub
+		return new SendingActionListener(){
+		      public void sendAction(ActionEvent e){	
+		    	  eCustomer customer = (eCustomer) customerType.getSelectedItem();
+		    	  double discount = Double.parseDouble(discountTextField.getText());
+		    	  
+		    	  try
+		    	  {
+					ServerFunctionExecuter.getInstance().ChangePurchaseTrack(customer.name(), discount);
+		    	  }
+		    	  catch(FromServerException fse)
+		    	  {
+		    		  fse.ShowPopup();
+		    	  }
+		    	  catch (IOException ioex)
+		    	  {
+					Popups.ServerConnectionError(ioex.getMessage());
+		    	  }
+		      }};
+	}
+
+	@Override
+	protected String getFrameTitle() {
+		// TODO Auto-generated method stub
+		return "Change discount";
+	}
+
+	@Override
+	protected int getFrameWidth() {
+		// TODO Auto-generated method stub
+		return 300;
+	}
+
+	@Override
+	protected int getFrameHeight() {
+		// TODO Auto-generated method stub
+		return 300;
+	}
+
+	@Override
+	protected JPanel createMainPanel()
+	{
+		JPanel myMainPanel = new JPanel();
+		
+		customerTypeLabel = new JLabel("Customer type -");
+		customerType = new JComboBox(eCustomer.values());
+		discountLabel = new JLabel("Discount % -");
+		discountTextField = new JTextField(3);
+
+		myMainPanel.add(customerTypeLabel);
+		myMainPanel.add(customerType);
+		myMainPanel.add(discountLabel);
+		myMainPanel.add(discountTextField);
+		
+		return myMainPanel;
+	}
+
+
+	@Override
+	protected String getSendButtonName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+}

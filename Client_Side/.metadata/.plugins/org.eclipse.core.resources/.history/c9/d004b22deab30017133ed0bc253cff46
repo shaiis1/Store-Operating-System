@@ -1,0 +1,17 @@
+package ChatMessage;
+
+import javax.swing.table.DefaultTableModel;
+
+public class ChatTableModel extends DefaultTableModel{
+	
+    public void setRowColour(int row, Color c) {
+        fireTableRowsUpdated(row, row);
+    }
+
+	
+    @Override
+    public boolean isCellEditable(int row, int column) {
+       //all cells false
+       return false;
+    }
+}

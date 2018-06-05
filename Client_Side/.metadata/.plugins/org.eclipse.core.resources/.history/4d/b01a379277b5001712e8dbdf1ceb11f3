@@ -1,0 +1,100 @@
+package UI.Frames.Statistics;
+
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.Map;
+import java.util.Vector;
+
+import org.json.JSONException;
+
+import Customer.CreateCustomerException;
+import Customer.Customer;
+
+import java.util.Map.Entry;
+
+import javax.swing.JCheckBox;
+import javax.swing.JPanel;
+
+import Items.ItemAmount;
+import Items.eItemCategory;
+import ServerFunctions.FromServerException;
+import ServerFunctions.ServerFunctionExecuter;
+import UI.Frames.tableFrame;
+import Workers.CreateWorkerException;
+import Workers.Worker;
+
+@SuppressWarnings("serial")
+public class byBranchFrame extends tableFrame{
+	
+	private Vector<JCheckBox> branchCheckBoxes;
+	
+	public byBranchFrame() throws UnknownHostException, JSONException, IOException, FromServerException, CreateCustomerException, CreateWorkerException
+	{
+		super();
+	}
+
+	@Override
+	protected  void setTableData(Vector<Vector<Object>> i_Data) throws UnknownHostException, IOException, FromServerException, JSONException, CreateCustomerException {
+		
+		Vector<String> selectedValues = new Vector<String>(); 
+		for(JCheckBox checkbox : branchCheckBoxes)
+		{
+			if(checkbox.isSelected())
+			{
+				selectedValues.add(checkbox.getText());
+			}
+		}
+		
+		Map<Customer,Vector<ItemAmount>> dataFromServer= ServerFunctionExecuter.getInstance().GetTodaySalesReporyByBranch(selectedValues);
+		
+		for(Entry<Customer, Vector<ItemAmount>> personPurcases : dataFromServer.entrySet())
+		{
+			for(ItemAmount itemAmount : personPurcases.getValue())
+			{
+				i_Data.add(new Vector<Object>(){{
+					this.add(personPurcases.getKey().toString());
+	   	  			this.add(itemAmount.getItemName());
+	   	  			this.add(itemAmount.getItemCategory());
+	   	  			this.add(itemAmount.getAmount());
+	   	  			this.add(itemAmount.getBranch());
+				}});
+			}
+		}
+	}
+	
+	@Override
+	protected JPanel createMainPanel()
+	{
+		JPanel myMainPanel = new JPanel();
+		branchCheckBoxes = new Vector<JCheckBox>();
+		
+		JCheckBox currentCheckBox;
+		
+		for(eItemCategory category : eItemCategory.values())
+		{
+			currentCheckBox = new JCheckBox(category.name());
+			branchCheckBoxes.add(currentCheckBox);
+			myMainPanel.add(currentCheckBox);
+		}
+		
+		myMainPanel.add(super.createMainPanel());
+		return myMainPanel;
+	}
+	
+
+	@Override
+	protected Vector<String> getColumnsNames() {
+		Vector<String> columnNames = new Vector<String>();
+		columnNames.add("Customer");
+		columnNames.add("Item Name");
+		columnNames.add("Category");
+		columnNames.add("Amount");
+		columnNames.add("Branch");
+		return columnNames;
+	}
+
+	@Override
+	protected String getFrameTitle() {
+		return "Report by branch";
+	}
+}

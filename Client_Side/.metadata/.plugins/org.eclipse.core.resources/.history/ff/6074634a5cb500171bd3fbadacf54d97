@@ -1,0 +1,40 @@
+package UI.Frames;
+
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.util.Vector;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+
+//TODO:
+public abstract class ButtonMenuFrame extends allFramesBase{
+	
+	
+	public ButtonMenuFrame()
+	{
+		super();
+		createMainPanel();
+	}
+	
+	protected abstract int getFrameWidth();
+	protected abstract int getFrameHeight();
+	
+	@Override
+	protected final JPanel createMainPanel()
+	{
+		JPanel myMainPanel = new JPanel();
+		
+		for(JButton button : getMenuButton())
+		{
+			button.setPreferredSize(new Dimension(80, 25));
+		}
+		
+		return myMainPanel;
+	}
+	
+	protected abstract Vector<JButton> getMenuButton();
+
+}

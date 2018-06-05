@@ -1,0 +1,47 @@
+package UI.Panels;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.io.IOException;
+
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+
+import ServerFunctions.ServerFunctionExecuter;
+import UI.Popups;
+import Workers.Worker;
+
+public class SellerPanel extends WorkerPanel {
+	
+	private JTextArea info;
+	private JPanel rightPanel;
+	
+	public SellerPanel(){
+		super();
+
+			Worker connectedUser;
+			try 
+			{
+				connectedUser = ServerFunctionExecuter.getInstance().GetLoggedInUser();
+				setPanels();
+				info = new JTextArea ();
+				info.setEditable(false);
+				info.setText(String.format("%s %s, \n ID:%s, \n %s, \n %s, \n Worker number:%s, \n Seller.",
+							 connectedUser.getFirstName(), connectedUser.getLastName(), connectedUser.getID(), connectedUser.getBranch().name(),
+							 connectedUser.getPhoneNumber(), connectedUser.getWorkerNumber()));
+				info.setPreferredSize(new Dimension(100,150));
+				info.setLineWrap(true);
+				rightPanel.add(info);
+				super.add(rightPanel, BorderLayout.EAST);
+			}
+			catch (IOException e)
+			{
+				Popups.ServerConnectionError(e.getMessage());
+			}
+	}
+	
+	private void setPanels(){
+		rightPanel = getRightPanel();
+	}
+}

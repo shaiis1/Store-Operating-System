@@ -1,0 +1,15 @@
+package Purchase;
+
+import org.json.JSONAble;
+
+import Workers.eBrunches;
+
+public class PurchaseRecorde extends JSONAble
+{
+	
+	eBrunches m_Brunch;
+	public PurchaseRecorde()
+	{
+		
+	}
+}

@@ -1,0 +1,4 @@
+3
+{"customerType":"NewCustomer","discount":"0.0"}
+{"discount":0.05,"customerType":"ReturnedCustomer"}
+{"discount":0.15,"customerType":"VipCustomer"}

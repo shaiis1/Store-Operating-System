@@ -1,0 +1,23 @@
+Project Members
+---------------------------------------------
+Amir Barak	305757272
+Tamir Shwartzberg	302325493
+Shai Israeli	201312196
+---------------------------------------------
+
+---------------------------------------------
+Server Socket Number
+10000
+---------------------------------------------
+
+------------------------------------------------------------------------------------------
+Loggin:
+Rishon Lezion branch Shift Manager	WorkerNumber	1
+				Password		123
+
+Tel Aviv branch Shift Manager		WorkerNumber	2
+				Password		123
+
+all workers number can be seen in the Employees button
+all workers password seted to 123 - for your convinience.
+------------------------------------------------------------------------------------------

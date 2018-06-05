@@ -1,0 +1,12 @@
+11
+{"date":"23/10/2017","itemName":"SportPants","amount":2,"itemCategory":"Upper","branch":"RishonLeZion","buyer":{"firstName":"Eti","lastName":"Paron","phoneNumber":"0548398287","ID":"205993943","type":"NewCustomer"}}
+{"date":"23/10/2017","itemName":"ButtonedShirt","amount":3,"itemCategory":"Shirt","branch":"RishonLeZion","buyer":{"firstName":"Eti","lastName":"Paron","phoneNumber":"0548398287","ID":"205993943","type":"NewCustomer"}}
+{"date":"23/10/2017","itemName":"Sweater","amount":5,"itemCategory":"Upper","branch":"RishonLeZion","buyer":{"firstName":"Eti","lastName":"Paron","phoneNumber":"0548398287","ID":"205993943","type":"NewCustomer"}}
+{"date":"23/10/2017","itemName":"JeansPants","amount":7,"itemCategory":"Pants","branch":"RishonLeZion","buyer":{"firstName":"Eti","lastName":"Paron","phoneNumber":"0548398287","ID":"205993943","type":"NewCustomer"}}
+{"date":"23/10/2017","itemName":"ButtonedShirt","amount":5,"itemCategory":"Shirt","branch":"RishonLeZion","buyer":{"firstName":"Uri","lastName":"Hai","phoneNumber":"0547969287","ID":"2048593848","type":"NewCustomer"}}
+{"date":"23/10/2017","itemName":"SportPants","amount":22,"itemCategory":"Upper","branch":"RishonLeZion","buyer":{"firstName":"Uri","lastName":"Hai","phoneNumber":"0547969287","ID":"2048593848","type":"NewCustomer"}}
+{"date":"23/10/2017","itemName":"JeansPants","amount":7,"itemCategory":"Pants","branch":"RishonLeZion","buyer":{"firstName":"Uri","lastName":"Hai","phoneNumber":"0547969287","ID":"2048593848","type":"NewCustomer"}}
+{"date":"23/10/2017","itemName":"ButtonedShirt","amount":8,"itemCategory":"Shirt","branch":"RishonLeZion","buyer":{"firstName":"Ben","lastName":"Vini","phoneNumber":"0528777765","ID":"204893030","type":"NewCustomer"}}
+{"date":"23/10/2017","itemName":"JeansPants","amount":3,"itemCategory":"Pants","branch":"RishonLeZion","buyer":{"firstName":"Eti","lastName":"Paron","phoneNumber":"0548398287","ID":"205993943","type":"ReturnedCustomer"}}
+{"date":"23/10/2017","itemName":"SportPants","amount":4,"itemCategory":"Upper","branch":"RishonLeZion","buyer":{"firstName":"Gal","lastName":"Galon","phoneNumber":"0527654321","ID":"20583988899","type":"NewCustomer"}}
+{"date":"23/10/2017","itemName":"Sweater","amount":5,"itemCategory":"Upper","branch":"RishonLeZion","buyer":{"firstName":"Gal","lastName":"Galon","phoneNumber":"0527654321","ID":"20583988899","type":"NewCustomer"}}

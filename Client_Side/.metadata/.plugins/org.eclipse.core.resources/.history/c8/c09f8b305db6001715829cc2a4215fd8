@@ -1,0 +1,66 @@
+package UI.Panels;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import UI.superButton;
+import UI.Frames.Purchase.discountFrame;
+
+@SuppressWarnings("serial")
+public class CashierPanel extends WorkerPanel{
+	
+	private superButton changePurchseDiscountButton;
+	private superButton updatePurchaseButton;
+	private superButton addToInventoryButton;
+
+	public CashierPanel(int panelWidth,int panelHeight)
+	{
+		super(panelWidth,panelHeight);
+	}
+	
+	@Override
+	protected void createComponents()
+	{
+		super.createComponents();
+		changePurchseDiscountButton = new superButton("New discount",c_Orange);
+		updatePurchaseButton = new superButton("New purchase",c_Orange);
+		addToInventoryButton = new superButton("Add to inventory", c_Orange);
+	}
+	
+	@Override
+	protected void attachToPanels()
+	{
+		super.attachToPanels();
+		rightPanel.add(changePurchseDiscountButton);
+		rightPanel.add(updatePurchaseButton);
+		rightPanel.add(addToInventoryButton);
+	}
+	@Override
+	protected void addEvents()
+	{
+		super.addEvents();
+		addOnChangePurchaseDiscountButtonClicked();
+	}
+	
+	private void addOnChangePurchaseDiscountButtonClicked()
+	{
+		changePurchseDiscountButton.addActionListener(new ActionListener()
+	    {
+	      public void actionPerformed(ActionEvent e)
+	      {
+	    	  Thread discountThread = new Thread(new Runnable(){
+	    		  @Override
+	    		  public void run(){
+	    			  try{
+	    					new discountFrame();
+	    			  }
+	    			  catch (Exception e1){
+	    					e1.printStackTrace();
+	    			  }
+	    		  }	  
+	    	  });
+	    	  discountThread.start();
+	      }
+	    });
+	}
+	
+}

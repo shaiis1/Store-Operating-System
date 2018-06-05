@@ -1,0 +1,9 @@
+8
+{"amount":700,"itemName":"SportPants","itemCategory":"Upper","branch":"TelAviv"}
+{"amount":1000,"itemName":"TShirt","itemCategory":"Shirt","branch":"TelAviv"}
+{"amount":300,"itemName":"ButtonedShirt","itemCategory":"Shirt","branch":"TelAviv"}
+{"amount":200,"itemName":"Coat","itemCategory":"Upper","branch":"TelAviv"}
+{"itemName":"ButtonedShirt","amount":384,"itemCategory":"Shirt","branch":"RishonLeZion"}
+{"itemName":"SportPants","amount":472,"itemCategory":"Upper","branch":"RishonLeZion"}
+{"itemName":"Sweater","amount":590,"itemCategory":"Upper","branch":"RishonLeZion"}
+{"itemName":"JeansPants","amount":883,"itemCategory":"Pants","branch":"RishonLeZion"}

@@ -1,0 +1,60 @@
+package UI.Frames;
+
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.Vector;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import org.json.JSONException;
+import Customer.CreateCustomerException;
+import ServerFunctions.FromServerException;
+import UI.Popups;
+import Workers.CreateWorkerException;
+
+@SuppressWarnings("serial")
+public abstract class tableFrame extends allFramesBase{
+	
+	private Vector<String> columnNames;
+	protected Vector<Vector<Object>> data;
+	private JScrollPane myMainPanel;
+	private JTable table;
+	
+	public tableFrame(){
+		super();
+		this.pack();
+		this.setLocationRelativeTo(null);
+	}
+
+	@Override
+	protected JPanel createMainPanel(){
+		JPanel toReturn = new JPanel();
+		
+		try{
+			createAndFillTable();
+			myMainPanel = new JScrollPane(table);
+			toReturn.add(myMainPanel);
+		}
+		catch(Exception e){
+			Popups.ShowError(e.getMessage());
+		}
+
+		return toReturn;
+	}
+	private void createAndFillTable() throws UnknownHostException, JSONException, IOException,
+				FromServerException, CreateCustomerException, CreateWorkerException{
+		table = new JTable();
+		columnNames = getColumnsNames();
+		data = createTableData();
+		UpdateTableData();
+	}
+	
+	protected void UpdateTableData(){
+		table.setModel(new DefaultTableModel(data, columnNames));
+	}
+	
+	protected abstract Vector<Vector<Object>> createTableData()  throws UnknownHostException, IOException,
+						FromServerException, JSONException, CreateCustomerException, CreateWorkerException;
+	protected abstract Vector<String> getColumnsNames();	
+} //end of tableFrame class

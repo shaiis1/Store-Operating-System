@@ -1,0 +1,14 @@
+package Server;
+
+import java.io.IOException;
+
+public class Program {
+
+	public static void main(String[] args) throws IOException
+	{	
+		Server theServer = new Server();
+		System.out.println("server is running...");
+		theServer.StartServer();
+		System.out.println("done.");	
+	}
+}

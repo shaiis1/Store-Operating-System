@@ -1,0 +1,121 @@
+package UI.Panels;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import UI.superButton;
+import UI.Frames.AddRemove.addOrRemoveFrame;
+import UI.Frames.All.AllEmployeesFrame;
+import UI.Frames.Statistics.StoreStatisticsFrame;
+import Workers.Worker;
+
+@SuppressWarnings("serial")
+public class ManagerPanel extends WorkerPanel {
+
+	private superButton storeStatisticsButton;
+	private superButton allEmployeesButton;
+	private superButton addOrRemoveButton;
+	
+	public ManagerPanel(int panelWidth,int panelHeight)
+	{
+		super(panelWidth,panelHeight);
+	}
+	
+	@Override
+	protected void createComponents()
+	{
+		super.createComponents();
+		
+		storeStatisticsButton = new superButton("Store statistics",c_Orange); //frame with information about all statistics
+		allEmployeesButton = new superButton("Employees",c_Orange); //frame with information about all workers
+		addOrRemoveButton = new superButton("Add or remove",c_Orange); //frame with register ability of new worker, customer or remove worker.
+	}
+	
+	@Override
+	protected void attachToPanels()
+	{
+		super.attachToPanels();
+		
+		rightPanel.add(storeStatisticsButton);
+		rightPanel.add(allEmployeesButton);
+		rightPanel.add(addOrRemoveButton);
+	}
+	
+	@Override
+	protected void addEvents()
+	{
+		super.addEvents();
+
+		addOnAllEmployeesButtonClicked();
+		addOnaddOrRemoveButtonClicked();
+		addStoreStatisticsButtonClicked();
+	}
+	
+	
+	private void addOnAllEmployeesButtonClicked()
+	{
+		allEmployeesButton.addActionListener(new ActionListener()
+	    {
+	      public void actionPerformed(ActionEvent e)
+	      {
+	    	  Thread employeesThread = new Thread(new Runnable(){
+	    		  @Override
+	    		  public void run(){
+	    			  try{
+	    					new AllEmployeesFrame();
+	    			  }
+	    			  catch (Exception e1){
+	    					e1.printStackTrace();
+	    			  }
+	    		  }	  
+	    	  });
+	    	  employeesThread.start();
+	      }
+	    });
+	}
+		
+	private void addOnaddOrRemoveButtonClicked()
+	{
+		//addOrRemoveButton On Click
+		addOrRemoveButton.addActionListener(new ActionListener()
+	    {
+	      public void actionPerformed(ActionEvent e)
+	      {
+	    	  Thread registerThread = new Thread(new Runnable(){
+	    		  @Override
+	    		  public void run(){
+	    			  try{
+	    					new addOrRemoveFrame();
+	    			  }
+	    			  catch (Exception e1){
+	    					e1.printStackTrace();
+	    			  }
+	    		  }	  
+	    	  });
+	    	  registerThread.start();
+	      }
+	    });
+	}
+	
+	private void addStoreStatisticsButtonClicked()
+	{
+		storeStatisticsButton.addActionListener(new ActionListener()
+	    {
+	      public void actionPerformed(ActionEvent e)
+	      {
+	    	  Thread inventoryThread = new Thread(new Runnable(){
+	    		  @Override
+	    		  public void run(){
+	    			  try{
+	    				  
+	    					new StoreStatisticsFrame();
+	    			  }
+	    			  catch (Exception e1){
+	    					e1.printStackTrace();
+	    			  }
+	    		  }	  
+	    	  });
+	    	  inventoryThread.start();
+	      }
+	    });
+	}
+}

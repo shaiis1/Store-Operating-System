@@ -1,0 +1,24 @@
+23
+| at 10/23/2017 12:48:12 |by user Moshe Zeavi (number:1)| New Worker Added Gil Baruch (ID:202958473) 
+| at 10/23/2017 12:49:56 |by user Moshe Zeavi (number:1)| New Worker Added Hanan Damari (ID:304938574) 
+| at 10/23/2017 12:51:08 |by user Moshe Zeavi (number:1)| New Worker Added Adi Tzarfari (ID:201194800) 
+| at 10/23/2017 12:54:08 |by user Moshe Zeavi (number:1)| New Worker Added Nofar Belulu (ID:2058493848) 
+| at 10/23/2017 12:56:13 |by user Moshe Zeavi (number:1)| New Worker Added Sharon Halfon (ID:305938485) 
+| at 10/23/2017 13:00:11 |by user Tom Halfon (number:2)| New Worker Added Alex Mizrahi (ID:304958384) 
+| at 10/23/2017 13:02:07 |by user Tom Halfon (number:2)| New Worker Added Jon Birion (ID:2049385823) 
+| at 10/23/2017 13:04:04 |by user Tom Halfon (number:2)| New Worker Added Avi Ron (ID:307748384) 
+| at 10/23/2017 13:05:04 |by user Tom Halfon (number:2)| New Worker Added Oren Hazan (ID:203885300) 
+| at 10/23/2017 14:13:16 |by user Moshe Zeavi (number:1)| New Custoer Added Eti Paron (205993943)
+| at 10/23/2017 14:13:53 |by user Moshe Zeavi (number:1)| New Custoer Added Uri Hai (2048593848)
+| at 10/23/2017 14:14:17 |by user Moshe Zeavi (number:1)| New Custoer Added Ben Vini (204893030)
+| at 10/23/2017 14:15:09 |by user Moshe Zeavi (number:1)| New Custoer Added Yoav Shaked (2059389483)
+| at 10/23/2017 14:15:43 |by user Moshe Zeavi (number:1)| New Custoer Added Yulia Vi (204938474)
+| at 10/23/2017 14:16:22 |by user Moshe Zeavi (number:1)| New Custoer Added Roni Daniel (3029948378)
+| at 10/23/2017 14:16:54 |by user Moshe Zeavi (number:1)| New Custoer Added Bar Dayan (2058839282)
+| at 10/23/2017 14:17:26 |by user Moshe Zeavi (number:1)| New Custoer Added Gal Galon (20583988899)
+| at 10/23/2017 16:12:55 |by user Tom Halfon (number:2)| New Worker Added Shai Israeli (ID:103) 
+| at 10/23/2017 17:58:44 |by user Hanan Damari (number:4)| Eti Paron (205993943) bought SportPants (2), ButtonedShirt (3), Sweater (5), JeansPants (7), .Total bill: 1720.000000.
+| at 10/23/2017 17:59:25 |by user Hanan Damari (number:4)| Uri Hai (2048593848) bought ButtonedShirt (5), SportPants (22), JeansPants (7), .Total bill: 2760.000000.
+| at 10/23/2017 17:59:39 |by user Hanan Damari (number:4)| Ben Vini (204893030) bought ButtonedShirt (8), .Total bill: 960.000000.
+| at 10/23/2017 18:00:12 |by user Hanan Damari (number:4)| Eti Paron (205993943) bought JeansPants (3), .Total bill: 342.000000.
+| at 10/23/2017 18:00:32 |by user Hanan Damari (number:4)| Gal Galon (20583988899) bought SportPants (4), Sweater (5), .Total bill: 640.000000.

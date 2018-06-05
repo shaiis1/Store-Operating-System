@@ -1,0 +1,48 @@
+1506258964121	Delete element
+1506276534930	Move compilation unit
+1506276544285	Move compilation unit
+1506328165478	Move compilation unit
+1506354180966	Copy files
+1506354293209	Copy file
+1506354536362	Rename resource 'DB_Items'
+1506354546856	Rename resource 'DB_Cashier'
+1506354556626	Rename resource 'DB_Cashier'
+1506354562132	Rename resource 'DB_Items'
+1506354718731	Move file
+1506354756341	Rename resource 'Items.txt'
+1506412377424	Move compilation unit
+1506413930628	Rename type 'NetworkMessage'
+1506414257114	Rename type 'SucssesMessage'
+1506414462168	Rename type 'NetworkReturnMessage'
+1506414736346	Rename type 'FromNetworkMessage'
+1506414767134	Rename type 'ReturnedNetworkMessage'
+1506415695140	Delete element
+1506416070087	Delete element
+1506416938540	Move compilation units
+1506419909716	Rename type 'OutOfRangeExtencion'
+1506421770572	Rename type 'IncItemAmount'
+1506421792937	Rename type 'DecItemAmount'
+1506443510128	Move compilation units
+1506443687621	Delete element
+1506444675785	Rename type 'IncItemAmountAction'
+1506445014646	Rename type 'IncByFieldAmountAction'
+1506445046221	Rename type 'DecItemAmountAction'
+1506445909233	Delete element
+1506445923216	Move compilation unit
+1506498666008	Rename type 'RespnseMessage'
+1506512386576	Delete element
+1506514313514	Move file
+1506514384359	Rename package 'Purches'
+1506514408836	Rename resource 'DB_Purches.txt'
+1506514491446	Rename resource 'Customers_DB.txt'
+1506600237606	Move file
+1506600984343	Delete element
+1506602268081	Move compilation unit
+1506602365415	Delete element
+1506604307265	Delete elements
+1506611697404	Delete element
+1506613041905	Rename type 'AmountItem'
+1506617600898	Rename resource 'DB_Users'
+1506623611460	Rename resource 'DB_ItemsAmount'
+1506631569848	Rename type 'DecByFieldAction'
+1506677576772	Delete element

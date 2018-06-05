@@ -1,0 +1,88 @@
+package UI.Panels;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+
+import javax.swing.JPanel;
+
+import org.json.JSONException;
+
+import ServerFunctions.FromServerException;
+import ServerFunctions.ServerFunctionExecuter;
+import UI.SocketData;
+import Workers.Cashier;
+import Workers.CreateWorkerException;
+import Workers.Seller;
+import Workers.ShiftManager;
+import Workers.Worker;
+
+public class panelsManager extends JPanel{
+	private LoginPanel loginPanel;
+	private WorkerPanel workerPanel;
+	Worker user;
+	
+	public panelsManager() throws Exception{
+
+		loginPanel = new LoginPanel();
+		loginPanel.setVisible(true);
+		this.add(loginPanel);
+		addLoginEvent();
+	}
+	
+	public void CommitLogIn()throws Exception{
+		if(user instanceof Cashier){
+			workerPanel = new CashierPanel();
+		}
+		else if(user instanceof Seller){
+			workerPanel = new SellerPanel();
+		}
+		else if(user instanceof ShiftManager){
+			workerPanel = new ManagerPanel();
+		}
+		this.add(workerPanel);
+		workerPanel.setVisible(true);
+		workerPanel.StartChat();
+		loginPanel.setVisible(false);
+		addLogOutEvent();
+	}
+	
+	private void addLoginEvent(){	
+		loginPanel.getLogInButton().addActionListener(new ActionListener(){
+		      public void actionPerformed(ActionEvent e)
+		      {
+		    	  try
+		    	  {
+		    		  user = ServerFunctionExecuter.getInstance().SignIn(loginPanel.getUserName().getText(),loginPanel.getPassword().getText());
+		    		  CommitLogIn();
+		    	  }
+		    	  catch (JSONException | IOException | FromServerException | CreateWorkerException e1)
+		    	  {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+				  }
+						
+		      }
+		});	
+	}
+	
+	private void addLogOutEvent(){
+		workerPanel.getLogOutButton().addActionListener(new ActionListener(){
+		      public void actionPerformed(ActionEvent e){
+		    	  try
+		    	  {
+		    		  ServerFunctionExecuter.getInstance().SignOut();
+		    	  }
+		    	  catch (IOException | FromServerException e1)
+		    	  {
+					// TODO Auto-generated catch block
+		    		  e1.printStackTrace();
+		    	  }
+		    	  workerPanel.setVisible(false);
+		          loginPanel.setVisible(true);
+		      }
+		});	
+	}
+} //end of panelsManager
+
+

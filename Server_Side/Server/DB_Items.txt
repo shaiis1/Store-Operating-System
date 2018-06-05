@@ -1,0 +1,8 @@
+8
+{"itemName":"SportPants","price":60,"category":"Pants"}
+{"itemName":"JeansPants","price":120,"category":"Pants"}
+{"itemName":"TailoredPants","price":200,"category":"Pants"}
+{"itemName":"TShirt","price":40,"category":"Shirt"}
+{"itemName":"ButtonedShirt","price":120,"category":"Shirt"}
+{"itemName":"Sweater","price":80,"category":"Upper"}
+{"itemName":"Coat","price":200,"category":"Upper"}

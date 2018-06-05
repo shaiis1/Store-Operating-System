@@ -1,0 +1,30 @@
+package UI.Frames;
+
+import java.util.Vector;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import UI.superButton;
+
+
+//TODO:
+@SuppressWarnings("serial")
+public abstract class ButtonMenuFrame extends allFramesBase{
+	
+	public ButtonMenuFrame(){
+		super();
+		createMainPanel();
+		this.pack();
+	}
+	
+	@Override
+	protected final JPanel createMainPanel(){
+		JPanel myMainPanel = new JPanel();
+		
+		for(JButton button : getMenuButton()){
+			myMainPanel.add(button);
+		}
+		return myMainPanel;
+	}
+	
+	protected abstract Vector<JButton> getMenuButton();
+}

@@ -1,0 +1,114 @@
+package UI.Frames.AddRemove;
+
+import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.net.UnknownHostException;
+
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import ServerFunctions.FromServerException;
+import ServerFunctions.ServerFunctionExecuter;
+import Workers.Cashier;
+import Workers.Seller;
+import Workers.ShiftManager;
+import Workers.eBranches;
+import Workers.eWorkers;
+
+public class addNewWorkerFrame extends addNewCustomerFrame{
+	
+	private eWorkers jobTitle;
+	
+	private JTextField bankNumberTextField;
+	private JTextField passwordTextField;
+	private JComboBox jobComboBox;
+	
+	private JLabel bankNumberLabel;
+	private JLabel jobLabel;
+	private JLabel passWordLabel;
+	
+	private String getBankNumber;
+	private String getPassWord;
+
+	public addNewWorkerFrame()
+	{
+		super();
+	}
+	
+	@Override
+	protected String getFrameTitle()
+	{
+		return "Add new worker";
+	}
+
+	@Override
+	protected int getFrameWidth() {
+		// TODO Auto-generated method stub
+		return 200;
+	}
+
+	@Override
+	protected int getFrameHeight() {
+		// TODO Auto-generated method stub
+		return 300;
+	}
+
+	@Override
+	protected JPanel createMainPanel()
+	{
+		JPanel myMainPanel = super.createMainPanel();
+		
+		bankNumberTextField = new JTextField(8);
+		bankNumberLabel = new JLabel("Bank number -");
+		jobComboBox = new JComboBox(eWorkers.values());
+		jobLabel = new JLabel("Job type -");
+		passWordLabel = new JLabel("Password -");
+		passwordTextField = new JTextField(10);
+		
+		myMainPanel.add(bankNumberLabel);
+		myMainPanel.add(bankNumberTextField);
+		myMainPanel.add(jobLabel);
+		myMainPanel.add(jobComboBox);
+		myMainPanel.add(passWordLabel);
+		myMainPanel.add(passwordTextField);
+		
+		
+		return myMainPanel;
+	}
+
+
+	@Override
+	protected SendingActionListener OnSendButtonClicked() {
+		// TODO Auto-generated method stub
+		return new SendingActionListener(){
+		      public void sendAction(ActionEvent e) throws UnknownHostException, IOException, FromServerException
+		      {
+		    	  eBranches branch;
+		    	  getFirstName = firstNameTextField.getText();
+		    	  getLastName = lastNameTextField.getText();
+		    	  getPhoneNumber = phoneNumberTextField.getText();
+		    	  getId = idTextField.getText();
+		    	  getBankNumber = bankNumberTextField.getText();
+		    	  jobTitle = (eWorkers) jobComboBox.getSelectedItem();
+		    	  getPassWord = passwordTextField.getText().toString();
+		    	  
+		    	  branch = ServerFunctionExecuter.getInstance().GetLoggedInUser().getBranch();
+		    	  if(jobTitle.equals(eWorkers.Cashier))
+		    	  {
+		    		  ServerFunctionExecuter.getInstance().AddWorker(new Cashier(getId, getFirstName,getLastName,getPhoneNumber,branch), getPassWord);
+		    	  }
+		    	  else if(jobTitle.equals(eWorkers.Seller))
+		    	  {
+		    		  ServerFunctionExecuter.getInstance().AddWorker(new Seller(getId, getFirstName,getLastName,getPhoneNumber,branch), getPassWord);
+		    	  }
+		    	  else if(jobTitle.equals(eWorkers.ShiftManager))
+		    	  {
+		    		  ServerFunctionExecuter.getInstance().AddWorker(new ShiftManager(getId, getFirstName,getLastName,getPhoneNumber,branch), getPassWord);
+		    	  }
+		      }};
+	}
+	
+	
+}

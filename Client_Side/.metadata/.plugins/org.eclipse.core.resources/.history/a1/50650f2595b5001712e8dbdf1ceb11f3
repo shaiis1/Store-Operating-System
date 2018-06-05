@@ -1,0 +1,79 @@
+package UI.Frames;
+
+import java.awt.Toolkit;
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.Vector;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+
+import org.json.JSONException;
+
+import Customer.CreateCustomerException;
+import ServerFunctions.FromServerException;
+import UI.Popups;
+import Workers.CreateWorkerException;
+
+@SuppressWarnings("serial")
+public abstract class tableFrame extends allFramesBase{
+
+	
+	private Vector<String> columnNames;
+	protected Vector<Vector<Object>> data;
+	private JScrollPane myMainPanel;
+	private JTable table;
+	private DefaultTableModel modelTable;
+	
+	public tableFrame()
+	{
+		super();
+	}
+
+	@Override
+	protected int getFrameWidth() {
+		return (int)(Toolkit.getDefaultToolkit().getScreenSize().width * 0.3);
+	}
+
+	@Override
+	protected int getFrameHeight() {
+		// TODO Auto-generated method stub
+		return (int)(Toolkit.getDefaultToolkit().getScreenSize().height * 0.5);
+	}
+
+	@Override
+	protected JPanel createMainPanel()
+	{
+		JPanel toReturn = new JPanel();
+		
+		try
+		{
+			createAndFillTable();
+			myMainPanel = new JScrollPane(table);
+			toReturn.add(myMainPanel);
+		}
+		catch(Exception fu)
+		{
+			Popups.ShowError(fu.getMessage());
+		}
+
+		return toReturn;
+	}
+	private void createAndFillTable() throws UnknownHostException, JSONException, IOException, FromServerException, CreateCustomerException, CreateWorkerException
+	{
+		table = new JTable();
+		columnNames = getColumnsNames();
+		data = createTableData();
+		UpdateTableData(data);
+		
+	}
+	protected void UpdateTableData(Vector<Vector<Object>> data)
+	{
+		table.setModel(new DefaultTableModel(data, columnNames));
+	}
+	protected abstract Vector<Vector<Object>> createTableData()  throws UnknownHostException, IOException, FromServerException, JSONException, CreateCustomerException, CreateWorkerException ;
+	protected abstract Vector<String> getColumnsNames();
+	
+	
+} //end of tableFrame class

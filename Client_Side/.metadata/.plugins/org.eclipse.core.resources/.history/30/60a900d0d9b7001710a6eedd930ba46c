@@ -1,0 +1,125 @@
+package ServerFunctions;
+
+import static org.junit.Assert.*;
+
+import java.io.IOException;
+import java.net.UnknownHostException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.Test;
+
+import Customer.CreateCustomerException;
+import Workers.CreateWorkerException;
+import Workers.Seller;
+import Workers.Worker;
+import Workers.eBranches;
+import UI.inputCheck;
+
+public class ServerFunctionExecuterTest {
+
+	@Test
+	public void checkPhoneTest(){
+		
+		//----- check incorrect phone number ----
+		String phone = new String("6503793797");
+		String expected = "illegal action. Phone number must contain only legal phone number!";
+		try{
+			 inputCheck.checkPhone(phone);
+		}
+		catch(Exception exc){
+			assertEquals(expected, exc.getMessage());
+		}
+		//----- check correct phone number ----	
+		String correctPhone = new String("0526669999");
+		try{
+			 inputCheck.checkPhone(phone);
+		}
+		catch(Exception exc){
+			assertEquals(expected, exc.getMessage());
+		}
+		assertEquals("Worked", "Worked");
+	}
+	
+	@Test
+	public void SignInTest(){
+		
+		//----  Correct Sign In   ------
+		String user = new String("3");
+		String Pass = new String("123");
+		//TODO:
+		String jsonExpecteduser = "{\"workerNumber\":\"3\",\"firstName\":\"Moshe\",\"lastName\":\"zeavi\",\"phoneNumber\":\"0543973112\",\"bankAccountNumber\":\"1\",\"ID\":\"3\",\"type\":\"ShiftManager\",\"branch\":\"RishonLeZion\"}";
+		try {
+			assertEquals(jsonExpecteduser, ServerFunctionExecuter.getInstance().SignIn(user, Pass).GetJSONObject().toString());
+		}
+		catch (JSONException | IOException | FromServerException | CreateWorkerException ignore){
+		}
+		
+		//----  Incorrect Sign In   ------
+		String IncorrectPass = new String("12");
+		String expectedMessage = new String("Worker number or Password are incorrect!");
+		try {
+			assertEquals(jsonExpecteduser, ServerFunctionExecuter.getInstance().SignIn(user, IncorrectPass).GetJSONObject().toString());
+		}
+		catch (JSONException | IOException | FromServerException | CreateWorkerException e){
+			assertEquals(expectedMessage, e.getMessage());
+		}
+	}
+	
+	@Test
+	public void getCustomerByIdTest(){
+		//TODO:
+		ServerFunctionExecuter.getInstance().SignIn("3", "123");
+		//----  Correct getCustomerById  ----
+		String id = "2";
+		String jsonExpecteduser = "{\"firstName\":\"Tamir\",\"lastName\":\"sh\",\"phoneNumber\":\"053242343\",\"ID\":\"2\",\"type\":\"VipCustomer\"}";
+		try {
+			assertEquals(jsonExpecteduser, ServerFunctionExecuter.getInstance().GetCustomerById(id).GetJSONObject().toString());
+		} 
+		catch (JSONException | IOException | FromServerException | CreateCustomerException ignore) {}
+		
+		//----  Incorrect getCustomerById  ----
+		String incorrectId = "1";
+		String expectedMessage = new String();
+		try {
+			assertEquals(jsonExpecteduser, ServerFunctionExecuter.getInstance().GetCustomerById(incorrectId).GetJSONObject().toString());
+		}
+		catch (JSONException | IOException | FromServerException | CreateCustomerException e) {
+			assertEquals(expectedMessage, e.getMessage());
+		}
+	}
+	public void rest(){
+		//---- Trying to add new worker with existing id ----
+		//eBranches branch = ServerFunctionExecuter.getInstance().GetLoggedInUser().getBranch();
+		//Seller newSeller = new Seller("103","Shika","Israeli","0503793797",branch,"101","1");
+		String jsonExpecteduser3 = "{\"ID : 103 all ready exists!\"}";
+		try
+		{
+		//	assertEquals(jsonExpecteduser3,ServerFunctionExecuter.getInstance().AddWorker(newSeller, Pass).toString());
+		}
+		catch(Exception ex)
+		{
+			System.out.println(ex.getMessage());
+		}
+		
+		//----  Check Logged In User  ----
+		String jsonExpecteduser4 = "Moshe zeavi (3)";
+		//assertEquals(jsonExpecteduser4,ServerFunctionExecuter.getInstance().GetLoggedInUser().toString());
+		
+		//---- Log Out ----
+		//ServerFunctionExecuter.getInstance().SignOut();
+		
+		//---- Sign In with Another User  ----
+		String user2 = new String("1");
+		String Pass2 = new String("123");
+		String jsonExpecteduser5 = "{\"workerNumber\":\"1\",\"firstName\":\"Noa\",\"lastName\":\"Mizrhi\",\"phoneNumber\":\"0522134932\",\"bankAccountNumber\":\"1\",\"ID\":\"1\",\"type\":\"Seller\",\"branch\":\"RishonLeZion\"}";
+	//assertEquals(jsonExpecteduser5,ServerFunctionExecuter.getInstance().SignIn(user2, Pass2).GetJSONObject().toString());
+		
+		//--- check Logged in user for User 2 ----
+		String jsonExpecteduser6 = "Noa Mizrhi (1)";
+		//assertEquals(jsonExpecteduser6,ServerFunctionExecuter.getInstance().GetLoggedInUser().toString());
+		
+		//---- Log Out With the Second User  ----
+		//ServerFunctionExecuter.getInstance().SignOut();
+	}
+
+}

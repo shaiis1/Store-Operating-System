@@ -1,0 +1,48 @@
+package UI.Frames.AddRemove;
+
+import java.awt.Color;
+import java.awt.Toolkit;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+import UI.superButton;
+
+public abstract class addingFrame extends allFramesBase
+{
+	protected int frameWidth = (int)(Toolkit.getDefaultToolkit().getScreenSize().width * 0.15);
+	protected int frameHeight = (int)(Toolkit.getDefaultToolkit().getScreenSize().height * 0.25);
+	protected JPanel mainPanel;
+	protected superButton sendButton;
+	
+	public addingFrame()
+	{
+		createMainPanel();
+	}
+	
+	
+	protected void setFrame()
+	{
+		this.setSize(frameWidth, frameHeight);
+		this.setLocationRelativeTo(rootPane);
+		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		this.setResizable(false);
+		this.setContentPane(mainPanel);
+		this.setVisible(true);
+	}
+	
+	protected void closeWindow()
+	{
+		this.dispose();
+	}
+	
+	private void createMainPanel(){
+		mainPanel = new JPanel();
+		sendButton = new superButton("Send",Color.ORANGE);
+	}
+	
+	protected void addSendButton(){
+		mainPanel.add(sendButton);
+	}
+
+}

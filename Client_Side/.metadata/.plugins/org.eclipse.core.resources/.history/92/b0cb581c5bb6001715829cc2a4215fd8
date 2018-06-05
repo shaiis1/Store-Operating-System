@@ -1,0 +1,66 @@
+package UI.Frames.Invetory;
+
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import Items.eItemsName;
+import ServerFunctions.ServerFunctionExecuter;
+import UI.Frames.AddRemove.SendingActionListener;
+import UI.Frames.AddRemove.sendingFrame;
+
+public class addToInventoryFrame extends sendingFrame
+{
+	private JComboBox<eItemsName> itemsNamesComboBox;
+	private JTextField amountToIncTextField;
+	
+	public addToInventoryFrame()
+	{
+		super();
+	}
+	
+	@Override
+	protected JPanel createMainPanel()
+	{
+		JPanel myMainPanel = new JPanel();
+		
+		itemsNamesComboBox = new JComboBox<eItemsName>(eItemsName.values());
+		amountToIncTextField = new JTextField(6);		
+		
+		myMainPanel.add(itemsNamesComboBox);
+		myMainPanel.add(amountToIncTextField);
+		return myMainPanel;
+	}
+	
+	@Override
+	protected String getSendButtonName() 
+	{
+		return "Add to invertory";
+	}
+	
+	@Override
+	protected SendingActionListener OnSendButtonClicked()
+	{
+		//TODO
+		ServerFunctionExecuter.getInstance().IncItemAmount(itemsNamesComboBox.getSelectedItem(), Integer.parseInt(s));
+	}
+
+	@Override
+	protected String getFrameTitle()
+	{
+		return "Add to invertory";
+	}
+
+	@Override
+	protected int getFrameWidth()
+	{
+		return 300;
+	}
+
+	@Override
+	protected int getFrameHeight()
+	{
+		return 300;
+	}
+	
+}

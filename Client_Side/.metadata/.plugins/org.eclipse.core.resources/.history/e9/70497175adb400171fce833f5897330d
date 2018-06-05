@@ -1,0 +1,70 @@
+package UI.Panels;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JPanel;
+
+import ServerFunctions.ServerFunctionExecuter;
+import UI.superButton;
+import UI.Frames.Purchase.discountFrame;
+import Workers.Worker;
+
+public class CashierPanel extends WorkerPanel{
+	
+	private superButton changePurchseDiscount;
+	private superButton updatePurchase;
+
+	public CashierPanel()
+	{
+		super();
+	}
+	
+	@Override
+	protected void createComponents()
+	{
+		super.createComponents();
+		changePurchseDiscount = new superButton("New discount");
+		updatePurchase = new superButton("New purchase");
+	}
+	
+	@Override
+	protected void attachToPanels()
+	{
+		super.attachToPanels();
+		rightPanel.add(changePurchseDiscount);
+		rightPanel.add(updatePurchase);
+	}
+	@Override
+	protected void addEvents()
+	{
+		super.addEvents();
+		addOnChangePurchaseDiscountButtonClicked();
+	}
+	
+	private void addOnChangePurchaseDiscountButtonClicked()
+	{
+		changePurchseDiscount.addActionListener(new ActionListener()
+	    {
+	      public void actionPerformed(ActionEvent e)
+	      {
+	    	  Thread discountThread = new Thread(new Runnable(){
+	    		  @Override
+	    		  public void run(){
+	    			  try{
+	    					new discountFrame();
+	    			  }
+	    			  catch (Exception e1){
+	    					e1.printStackTrace();
+	    			  }
+	    		  }	  
+	    	  });
+	    	  discountThread.start();
+	      }
+	    });
+	}
+	
+}

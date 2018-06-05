@@ -1,0 +1,116 @@
+package UI.Frames.AddRemove;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import org.json.JSONException;
+
+import Customer.CreateCustomerException;
+import Person.Person;
+import ServerFunctions.FromServerException;
+import ServerFunctions.ServerFunctionExecuter;
+import UI.Popups;
+import UI.superButton;
+import UI.Frames.allFramesBase;
+import Workers.CreateWorkerException;
+import Workers.Worker;
+
+@SuppressWarnings("serial")
+public class removeWorkerFrame extends sendingFrame {
+
+	private JLabel workerNameLabel;
+	private JComboBox<Person> workerName;
+	private superButton remove;
+	
+	public removeWorkerFrame()
+	{
+		super();
+	}
+
+	@Override
+	protected String getFrameTitle()
+	{
+		return "Remove worker";
+	}
+
+	@Override
+	protected int getFrameWidth()
+	{
+		return (int)(Toolkit.getDefaultToolkit().getScreenSize().width * 0.3);
+	}
+
+	@Override
+	protected int getFrameHeight()
+	{
+		return (int)(Toolkit.getDefaultToolkit().getScreenSize().height * 0.15);
+	}
+
+	@Override
+	protected JPanel createMainPanel()
+	{
+		JPanel myMainPanel = new JPanel();
+		
+		try
+		{
+			workerNameLabel = new JLabel("Choose worker -");
+			workerName = new JComboBox<Person>(ServerFunctionExecuter.getInstance().GetAllWorkers());
+			workerName.setPreferredSize( new Dimension( 200, 30 ) );
+			remove = new superButton("Remove",Color.ORANGE);
+		
+			myMainPanel.add(workerNameLabel);
+			myMainPanel.add(workerName);
+			myMainPanel.add(remove);
+		}
+		catch(JSONException | CreateCustomerException | CreateWorkerException parsing_ex)
+		{
+			Popups.ShowError("Problem with parsing from server\n"+parsing_ex.getMessage());
+		}
+		catch (FromServerException fsex)
+		{
+			fsex.ShowPopup();
+		}
+		catch (IOException ioex)
+		{
+			Popups.ServerConnectionError(ioex.getMessage());
+		}
+		
+		return myMainPanel;
+	}
+
+	@Override
+	protected String getSendButtonName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	protected SendingActionListener OnSendButtonClicked() {
+		// TODO Auto-generated method stub
+		return addActionListener(new ActionListener(){
+		      public void actionPerformed(ActionEvent e){
+		    	  	
+		    	  Worker chosenWorker = (Worker) workerName.getSelectedItem();
+		    	  try 
+		    	  {
+		    		  ServerFunctionExecuter.getInstance().RemoveWorker(chosenWorker);
+		    	  }
+		    	  catch (FromServerException fsex)
+		    	  {
+		    		  fsex.ShowPopup();
+		    	  }
+		    	  catch (IOException ioex)
+		    	  {
+		    		  Popups.ServerConnectionError(ioex.getMessage());
+		    	  }
+		    	  
+		      }});
+	}
+} //end of removeFrame class

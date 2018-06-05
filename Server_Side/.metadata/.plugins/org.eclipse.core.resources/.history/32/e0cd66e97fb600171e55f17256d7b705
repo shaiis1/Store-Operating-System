@@ -1,0 +1,5 @@
+package FileAction.GetData;
+
+public class GetAllStringData extends FileActionGetLines{
+
+}

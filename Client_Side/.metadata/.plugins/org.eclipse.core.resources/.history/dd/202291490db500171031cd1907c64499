@@ -1,0 +1,108 @@
+package UI.Frames.AddRemove;
+
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.net.UnknownHostException;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import Customer.NewCustomer;
+import ServerFunctions.FromServerException;
+import ServerFunctions.ServerFunctionExecuter;
+import UI.superButton;
+
+public class addNewCustomerFrame extends sendingFrame
+{
+	protected JTextField firstNameTextField;
+	protected JTextField lastNameTextField;
+	protected JTextField phoneNumberTextField;
+	protected JTextField idTextField;
+	
+	protected JLabel firstNameLabel;
+	protected JLabel lastNameLabel;
+	protected JLabel phoneNumberLabel;
+	protected JLabel idLabel;
+	
+	protected String getFirstName;
+	protected String getLastName;
+	protected String getPhoneNumber;
+	protected String getId;
+	
+	public addNewCustomerFrame()
+	{
+		super();
+	}
+
+	@Override
+	protected String getFrameTitle()
+	{
+		return "Add new customer";
+	}
+
+	@Override
+	protected int getFrameWidth() {
+		// TODO Auto-generated method stub
+		return 200;
+	}
+
+	@Override
+	protected int getFrameHeight() {
+		// TODO Auto-generated method stub
+		return 200;
+	}
+
+	@Override
+	protected JPanel createMainPanel()
+	{
+		JPanel myMainPanel = new JPanel();
+
+		firstNameTextField = new JTextField(10);
+		lastNameTextField = new JTextField(10);
+		phoneNumberTextField = new JTextField(8);
+		idTextField = new JTextField(10);
+		sendButton = new superButton("send", Color.orange);
+		
+		firstNameLabel = new JLabel("First name -");
+		lastNameLabel = new JLabel("Last name -");
+		phoneNumberLabel = new JLabel("Phone number -");
+		idLabel = new JLabel("Id number -");
+
+
+		myMainPanel.add(firstNameLabel);
+		myMainPanel.add(firstNameTextField);
+		myMainPanel.add(lastNameLabel);
+		myMainPanel.add(lastNameTextField);
+		myMainPanel.add(phoneNumberLabel);
+		myMainPanel.add(phoneNumberTextField);
+		myMainPanel.add(idLabel);
+		myMainPanel.add(idTextField);
+		
+		return myMainPanel;
+	}
+
+
+	@Override
+	protected SendingActionListener OnSendButtonClicked() {
+		// TODO Auto-generated method stub
+		return new SendingActionListener()
+		{
+		      public void sendAction(ActionEvent e) throws UnknownHostException, IOException, FromServerException
+		      {
+		    	  getFirstName = firstNameTextField.getText();
+		    	  getLastName = lastNameTextField.getText();
+		    	  getPhoneNumber = phoneNumberTextField.getText();
+		    	  getId = idTextField.getText();
+		    	  
+		    	  ServerFunctionExecuter.getInstance().AddCustomer(new NewCustomer(getId, getFirstName,getLastName,getPhoneNumber));
+
+		      }
+		 };
+	}
+
+	@Override
+	protected String getSendButtonName() {
+		return "Add";
+	}
+}

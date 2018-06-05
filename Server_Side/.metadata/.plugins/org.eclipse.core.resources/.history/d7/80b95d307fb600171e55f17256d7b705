@@ -1,0 +1,20 @@
+package FileAction.GetData;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+public class GetAllData extends FileActionGetLines
+{
+
+	public GetAllData(String i_Path)
+	{
+		super(i_Path);
+	}
+
+	@Override
+	protected void doOnEveryLine(JSONObject i_CurrentJSONObject, JSONArray i_Array)
+	{
+		i_Array.put(i_CurrentJSONObject);
+	}
+	
+}

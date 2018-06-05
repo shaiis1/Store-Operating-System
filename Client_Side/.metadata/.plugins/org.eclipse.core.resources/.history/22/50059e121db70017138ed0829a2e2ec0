@@ -1,0 +1,51 @@
+package UI.Frames;
+
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.util.Vector;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+import UI.superButton;
+
+
+//TODO:
+public abstract class ButtonMenuFrame extends allFramesBase{
+	
+	private int howManyButtons = 0;
+	public ButtonMenuFrame()
+	{
+		super();
+		createMainPanel();
+	}
+	
+	@Override
+	protected final JPanel createMainPanel()
+	{
+		JPanel myMainPanel = new JPanel();
+		
+		for(JButton button : getMenuButton())
+		{
+			howManyButtons++;
+			//button.setPreferredSize(new Dimension(100, 25));
+			myMainPanel.add(button);
+		}
+		
+		return myMainPanel;
+	}
+	
+	protected abstract Vector<JButton> getMenuButton();
+	
+	@Override
+	protected int getFrameWidth() {
+		return superButton.allButtonsWidth + 10;
+	}
+
+	@Override
+	protected int getFrameHeight() {
+		return (superButton.allButtonsHeight * howManyButtons) + 10;
+	}
+
+}

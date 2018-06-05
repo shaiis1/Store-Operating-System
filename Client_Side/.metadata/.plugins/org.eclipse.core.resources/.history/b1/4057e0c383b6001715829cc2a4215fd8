@@ -1,0 +1,78 @@
+package UI.Frames.Logs;
+
+import java.awt.Dimension;
+import java.io.IOException;
+import java.util.Vector;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
+
+import ServerFunctions.FromServerException;
+import ServerFunctions.ServerFunctionExecuter;
+import UI.Popups;
+import UI.Frames.allFramesBase;
+
+public class logsFrame extends allFramesBase {
+	
+	private JPanel logsPanel;
+	private JScrollPane logsScrollPane;
+	private Vector<String> dataFromServer;
+	
+	public logsFrame(){
+		super();
+	}
+
+	@Override
+	protected String getFrameTitle() {
+		return "Logs";
+	}
+
+	@Override
+	protected int getFrameWidth() {
+		return 640;
+	}
+
+	@Override
+	protected int getFrameHeight() {
+		return 400;
+	}
+
+	@Override
+	protected JPanel createMainPanel() {
+		JPanel myMainPanel = new JPanel();
+		
+		logsPanel = new JPanel();
+		logsScrollPane = new JScrollPane(logsPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		logsScrollPane.setPreferredSize(new Dimension (630, 300));
+		logsPanel.setPreferredSize(new Dimension (640, 400));
+		setDataToPanel();
+		myMainPanel.add(logsScrollPane);
+		return myMainPanel;
+	}
+	
+	private void setDataToPanel(){
+		StringBuilder labelString = new StringBuilder();
+		
+		try
+		{
+			labelString.append("<html>");
+			dataFromServer = ServerFunctionExecuter.getInstance().GetAllLogs();
+			for(String row : dataFromServer){
+				labelString.append(String.format("%s<br>", row));
+			}
+			labelString.append("</html>");
+			JLabel currentLabel = new JLabel(labelString.toString());
+			logsPanel.add(currentLabel);
+		}
+		catch (FromServerException fsex)
+		{
+			fsex.ShowPopup();
+		}
+		catch (IOException ioex)
+		{
+			Popups.ServerConnectionError(ioex.getMessage());;
+		}
+	}
+
+}

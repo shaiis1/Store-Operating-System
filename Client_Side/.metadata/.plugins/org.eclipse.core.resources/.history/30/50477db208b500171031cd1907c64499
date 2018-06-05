@@ -1,0 +1,118 @@
+package UI.Frames.Statistics;
+
+import java.awt.Color;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+import ServerFunctions.ServerFunctionExecuter;
+import UI.buttonedInterface;
+import UI.superButton;
+import UI.Frames.ButtonMenuFrame;
+import Workers.Worker;
+
+public class StoreStatisticsFrame extends ButtonMenuFrame implements buttonedInterface {
+
+	private superButton byBranch;
+	private superButton byProduct;
+	private superButton byCategory;
+	private superButton showVIP;
+	private Worker m_user;
+		
+	public StoreStatisticsFrame() throws Exception{
+		super();
+		createButtons();
+		setFrame();
+		addEvents();
+	}
+	
+	@Override
+	protected void setFrame(){
+		this.setTitle("Store Statistics");
+		super.setFrame();
+	}
+	
+	public void createButtons(){
+		byBranch = new superButton("By branch",Color.ORANGE);
+		byProduct = new superButton("By product",Color.ORANGE);
+		byCategory = new superButton("By category",Color.ORANGE);
+		showVIP = new superButton("Show VIP",Color.ORANGE);
+		addButtonsToPanel();
+	}
+		
+	public void addButtonsToPanel(){
+		mainPanel.add(byBranch);
+		mainPanel.add(byProduct);
+		mainPanel.add(byCategory);
+		mainPanel.add(showVIP);	
+	}
+	
+	public void addEvents(){
+		byCategory.addActionListener(new ActionListener(){
+	      public void actionPerformed(ActionEvent e){
+	    	  Thread byCategoryThread = new Thread(new Runnable(){
+	    		  @Override
+	    		  public void run(){
+	    			  try{
+	    					new byCategoryFrame();
+	    			  }
+	    			  catch (Exception e1){
+	    					e1.printStackTrace();
+	    			  }
+	    		  }	  
+	    	  });
+	    	  byCategoryThread.start();
+	      }});
+		
+		byProduct.addActionListener(new ActionListener(){
+		      public void actionPerformed(ActionEvent e){
+		    	  Thread byItemThread = new Thread(new Runnable(){
+		    		  @Override
+		    		  public void run(){
+		    			  try{
+		    					new byItemFrame(m_user);
+		    			  }
+		    			  catch (Exception e1){
+		    					e1.printStackTrace();
+		    			  }
+		    		  }	  
+		    	  });
+		    	  byItemThread.start();
+		      }});
+		
+		byBranch.addActionListener(new ActionListener(){
+		      public void actionPerformed(ActionEvent e){
+		    	  Thread byBranchThread = new Thread(new Runnable(){
+		    		  @Override
+		    		  public void run(){
+		    			  try{
+		    					new byBranchFrame(m_user);
+		    			  }
+		    			  catch (Exception e1){
+		    					e1.printStackTrace();
+		    			  }
+		    		  }	  
+		    	  });
+		    	  byBranchThread.start();
+		      }});
+		
+		showVIP.addActionListener(new ActionListener(){
+		      public void actionPerformed(ActionEvent e){
+		    	  Thread showVIPThread = new Thread(new Runnable(){
+		    		  @Override
+		    		  public void run(){
+		    			  try{
+		    					new AllVipCustomersFrame();
+		    			  }
+		    			  catch (Exception e1){
+		    					e1.printStackTrace();
+		    			  }
+		    		  }	  
+		    	  });
+		    	  showVIPThread.start();
+		      }});
+	}	
+}

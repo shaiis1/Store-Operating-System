@@ -1,0 +1,42 @@
+package UI.Frames;
+
+import java.awt.Color;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+import UI.superButton;
+
+@SuppressWarnings("serial")
+public abstract class allFramesBase extends JFrame
+{
+	private JPanel mainPanel;
+	
+	public allFramesBase()
+	{
+		this.setTitle(getFrameTitle());
+		this.setSize(getFrameWidth(), getFrameHeight());
+		superButton.allButtonsWidth = getFrameWidth() /4;
+		superButton.allButtonsHeight = getFrameWidth() /20;
+		this.setBackground(Color.BLACK);
+		mainPanel = createMainPanel();
+		this.setContentPane(mainPanel);
+		
+		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		this.setLocationRelativeTo(rootPane);
+		this.setResizable(false);
+		this.setVisible(true);
+	}
+	
+	protected JPanel getMainPanel()
+	{
+		return mainPanel;
+	}
+	
+	protected abstract String getFrameTitle();
+	protected abstract int getFrameWidth();
+	protected abstract int getFrameHeight();
+	protected abstract JPanel createMainPanel();
+
+	
+}

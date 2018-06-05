@@ -1,0 +1,31 @@
+package Server;
+
+import java.io.IOException;
+
+public class Program {
+
+	public static void main(String[] args) throws IOException
+	{
+		/*Worker cashier = new Cashier("1","Karin","Levi","0529302944",eBrunches.RishonLeZion,"1");
+		Worker seller = new Seller("2","Noa","Mizrhi","0522134932",eBrunches.RishonLeZion,"2");
+		Worker shiftManager = new ShiftManager("3","Moshe","zeavi","0543973112",eBrunches.RishonLeZion,"3");
+		
+		Customer newCustomer = new NewCustomer("1","Shay","israely","0532934933");
+		Customer returnedCustomer = new ReturnedCustomer("2","Tamir","sh","053242343");
+		Customer vipCustomer = new VipCustomer("3","Amir","Barak","0525934843");
+		
+		System.out.println(newCustomer.GetJSONObject().toString());
+		System.out.println(returnedCustomer.GetJSONObject().toString());
+		System.out.println(vipCustomer.GetJSONObject().toString());
+		System.out.println(seller.GetJSONObject().toString());
+		System.out.println(cashier.GetJSONObject().toString());
+		System.out.println(shiftManager.GetJSONObject().toString());*/
+		
+		Server theServer = new Server(2003);
+		System.out.println("server is running...");
+		theServer.StartServer();
+		System.out.println("doen.");
+		
+	}
+
+}

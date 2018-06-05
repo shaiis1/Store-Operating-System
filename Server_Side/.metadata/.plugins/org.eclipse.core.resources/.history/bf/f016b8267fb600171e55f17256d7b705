@@ -1,0 +1,50 @@
+package FileAction.GetData;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Scanner;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public abstract class FileActionGetLines
+{
+	private String m_Path;
+	
+	public FileActionGetLines(String i_Path)
+	{
+		m_Path = i_Path;
+	}
+	
+	public JSONArray Execute() throws FileNotFoundException,JSONException,IOException
+	{
+		JSONArray allFileArray = new JSONArray();
+		File inputFile = null;
+		Scanner fileScanner = null;
+		JSONObject currentJSONObject = null;
+        try
+        {
+        	inputFile = new File(m_Path);
+            fileScanner = new Scanner(inputFile);
+            fileScanner.nextLine();
+
+            while (fileScanner.hasNextLine())
+            {	
+                currentJSONObject = new JSONObject(fileScanner.nextLine());
+            	doOnEveryLine(currentJSONObject,allFileArray);//injection point
+            }
+        }
+        finally
+        {
+            fileScanner.close();
+        }
+        
+		return allFileArray;
+	}
+	
+	protected abstract void doOnEveryLine(JSONObject i_CurrentJSONObject,JSONArray i_Array);
+	
+}
+
+

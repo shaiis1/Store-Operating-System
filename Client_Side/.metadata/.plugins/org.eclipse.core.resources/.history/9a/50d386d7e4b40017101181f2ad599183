@@ -1,0 +1,57 @@
+package UI;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Insets;
+import java.awt.Point;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+
+public class superButton extends JButton
+{
+	private Color c_Color;
+	
+	public superButton(String title,Color i_Color)
+	{
+		super(title);
+		c_Color = i_Color;
+		SetColors();
+        setContentAreaFilled(false);
+        setPreferredSize(new Dimension(130, 25));
+        setMargin(new Insets(6, 6, 6, 6));
+        setBorder(BorderFactory.createLineBorder(c_Orange,3));
+
+	}
+	
+	private void SetColors()
+	{
+		float [] hsb = new float[3];
+		
+		Color.RGBtoHSB(252, 187, 0, hsb);
+		c_Orange = Color.getHSBColor(hsb[0], hsb[1], hsb[2]);
+	}
+	
+    @Override
+    protected void paintComponent(Graphics g){
+        Graphics2D g2 = (Graphics2D)g.create();
+        g2.setPaint(new GradientPaint(
+                new Point(0, 0), 
+                Color.WHITE, 
+                new Point(0, getHeight()/2), 
+                c_Color));
+        g2.fillRect(0, 0, getWidth(), getHeight()/3);
+        g2.setPaint(new GradientPaint(
+                new Point(0, getHeight()/3), 
+                c_Color, 
+                new Point(0, getHeight()), 
+                c_Color));
+        g2.fillRect(0, getHeight()/3, getWidth(), getHeight());
+        g2.dispose();
+
+        super.paintComponent(g);
+    }
+}

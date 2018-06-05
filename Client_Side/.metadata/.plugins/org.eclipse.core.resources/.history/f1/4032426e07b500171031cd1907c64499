@@ -1,0 +1,51 @@
+package UI.Frames.AddRemove;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.UnknownHostException;
+
+import ServerFunctions.FromServerException;
+import UI.Popups;
+
+public abstract class SendingActionListener implements ActionListener
+{
+	private boolean isSucceed = false;
+	
+	public abstract void sendAction(ActionEvent e) throws UnknownHostException, IOException, FromServerException;
+	
+	@Override
+	public final void actionPerformed(ActionEvent e)
+	{
+		
+		
+  	  /*catch(FromServerException fse)
+  	  {
+  		  fse.ShowPopup();
+  	  }
+  	  catch (IOException ioex)
+  	  {
+			Popups.ServerConnectionError(ioex.getMessage());
+  	  }*/
+		
+		
+		
+		isSucceed = false;
+		try
+		{
+			sendAction(e);
+			isSucceed = true;
+		} catch (IOException | FromServerException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		
+	}
+	
+	
+	public boolean isSucceed()
+	{
+		return isSucceed;
+	}
+}

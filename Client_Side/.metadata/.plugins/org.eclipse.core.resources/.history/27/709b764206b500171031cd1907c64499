@@ -1,0 +1,52 @@
+package UI.Frames.AddRemove;
+
+import java.awt.Color;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.function.Function;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+import UI.superButton;
+import UI.Frames.allFramesBase;
+
+public abstract class sendingFrame extends allFramesBase
+{
+	protected superButton sendButton;
+	
+	public sendingFrame()
+	{
+		super();
+		
+		sendButton = new superButton("Send",Color.orange);
+		 addOnSendButtonClicked()
+		
+		super.getMainPanel().add(sendButton);
+	}
+	
+	private disposeFrame()
+	{
+		this.dispose();
+	}
+	public void addOnSendButtonClicked()
+	{
+		sendButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				SendingActionListener fucntion = OnSendButtonClicked();
+				fucntion.actionPerformed(null);
+				if(fucntion.isSucceed())
+				{
+					dispose();
+				}
+				
+			}
+		});
+	}
+	
+	protected abstract SendingActionListener OnSendButtonClicked();
+}

@@ -1,0 +1,29 @@
+package ChatMessage;
+
+import java.awt.Color;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.swing.table.DefaultTableModel;
+
+public class ChatTableModel extends DefaultTableModel{
+	
+	
+    List<Color> rowColours = Arrays.asList(
+            Color.RED,
+            Color.GREEN,
+            Color.CYAN
+        );
+    
+    public void setRowColour(int row, Color c) {
+        rowColours.set(row, c);
+        fireTableRowsUpdated(row, row);
+    }
+
+	
+    @Override
+    public boolean isCellEditable(int row, int column) {
+       //all cells false
+       return false;
+    }
+}

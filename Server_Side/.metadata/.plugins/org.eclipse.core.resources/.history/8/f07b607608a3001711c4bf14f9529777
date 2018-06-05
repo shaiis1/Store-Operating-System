@@ -1,0 +1,211 @@
+package Server;
+
+import java.io.*;
+import java.net.*;
+import org.json.*;
+import FilesManeger.*;
+import NetworkMessage.ErrorMessage;
+import NetworkMessage.RequestMessage;
+import NetworkMessage.RespnseMessage;
+import NetworkMessage.SuccessMessage;
+import NetworkMessage.eFunctions;
+import Workers.*;
+import Customer.*;
+import FileActions.AllReadyExistsException;
+import FileActions.DeleteFileException;
+import FileActions.RenameFileException;
+
+public class Server
+{	
+	private FileManager m_FileManager;
+	private final ServerSocket m_ServerSocket;
+	
+	public Server(int i_ServerSocketPort) throws IOException
+	{
+		m_FileManager = FileManager.CreateOrGetInstance();
+		m_ServerSocket = new ServerSocket(i_ServerSocketPort);
+	}
+	
+	@Override
+	public void finalize()
+	{
+		if(!m_ServerSocket.isClosed())
+		{
+			try
+			{
+				m_ServerSocket.close();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}	
+		}
+	}
+		
+	public void StartServer() throws IOException
+	{
+		while(true)
+		{
+			final Socket socket = m_ServerSocket.accept();
+			
+			new Thread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					DataInputStream inputStream = null;
+					PrintStream outputStream = null;
+					RespnseMessage messageToReturn;
+					
+					try
+					{
+						inputStream = new DataInputStream(socket.getInputStream());
+						outputStream = new PrintStream(socket.getOutputStream());
+					}
+					catch(IOException ignor){}
+					
+					outputStream.print(true);
+					
+					messageToReturn = getClientDataAndExecute(inputStream);
+					outputStream.println(messageToReturn.GetJSONObject().toString());
+					
+					try
+					{
+						socket.close();
+					} 
+					catch (IOException ignor){}
+					
+				}
+			}).start();
+		}
+	}
+	
+	@SuppressWarnings("deprecation")
+	private RespnseMessage getClientDataAndExecute(DataInputStream inputStream)
+	{
+		RespnseMessage messageToClient;
+		RequestMessage messageFromClient = null;
+		
+		try
+		{
+			messageFromClient = new RequestMessage(new JSONObject(inputStream.readLine()));
+		}
+		catch (IOException ignor){}
+		
+		messageToClient = ExecuteFunction(messageFromClient);
+		
+		return messageToClient;
+		
+	}
+	
+	@SuppressWarnings("finally")
+	private RespnseMessage ExecuteFunction(RequestMessage i_ClientRequest)
+	{
+		eFunctions function = i_ClientRequest.getFunction();
+		JSONObject data = i_ClientRequest.getData();
+		JSONObject dataToReturn = null;
+		RespnseMessage messageToReturn = null;
+		
+		try
+		{
+			switch(function)
+			{
+				case AddCustomer	:	addCustomer(data);
+										break;
+				case AddWorker		:	addWorker(data);
+										break;
+				case RemoveWorker 	: 	removeWorker(data);
+										break;
+				case RemoveCustomer :	removeCustomer(data);
+										break;
+				case IncItemAmount	:   incItemAmount(data);
+										break;
+				case DecItemAmount  :   decItemAmount(data);
+										break;
+				case GetVIPCustomers:   dataToReturn = getVipCustomers();
+										break;
+				case GetAllExistItems:	dataToReturn = getAllExistItems();
+										break;
+				case GetItemsAmount:	dataToReturn = getItemsAmount(data);
+										break;
+				default				:	messageToReturn = new ErrorMessage("No Such Function");
+			}
+		}
+		catch(Exception ex)
+		{
+			messageToReturn = new ErrorMessage(ex.getMessage());
+		}
+		finally
+		{
+			if(messageToReturn == null)
+			{
+				if(dataToReturn==null)
+				{
+					messageToReturn = new SuccessMessage(null);
+				}
+				else
+				{
+					messageToReturn = new SuccessMessage(dataToReturn.toString());
+				}
+			}
+			
+			return messageToReturn;
+		}
+	}
+
+	private JSONObject getItemsAmount(JSONObject data) {
+		eBrunches brunch = data.getEnum(eBrunches.class, "brunch");
+		return m_FileManager.GetItemsAmount(brunch);
+	}
+
+	private JSONObject getAllExistItems() throws FileNotFoundException
+	{
+		return m_FileManager.GetAllExistItems();
+	}
+
+	private JSONObject getVipCustomers() throws FileNotFoundException
+	{
+		return m_FileManager.GetVipCustomers();
+	}
+
+	private void addWorker(JSONObject i_Worker) throws CreateWorkerException, IOException, AllReadyExistsException
+	{
+		Worker worker = WorkerFactory.CreateWorker(i_Worker);
+		m_FileManager.AddWorker(worker);
+	}
+	
+	private void removeWorker(JSONObject i_Worker) throws Exception
+	{
+		Worker worker = WorkerFactory.CreateWorker(i_Worker);
+		m_FileManager.RemoveWorker(worker);
+	}
+	
+	private void addCustomer(JSONObject i_Customer) throws CreateCustomerException, IOException, AllReadyExistsException
+	{
+		Customer customer = CustomerFactory.CreateCustomer(i_Customer);
+		m_FileManager.AddCustomer(customer);
+	}
+	
+	private void removeCustomer(JSONObject i_Customer) throws Exception
+	{
+		Customer customer = CustomerFactory.CreateCustomer(i_Customer);
+		m_FileManager.RemoveCustomer(customer);
+	}
+
+	private void incItemAmount(JSONObject i_Data) throws Exception
+	{
+		int amount = i_Data.getInt("amount");
+		String itemID = i_Data.getString("ID");
+		eBrunches brunch = i_Data.getEnum(eBrunches.class, "brunch");
+		m_FileManager.IncItemAmount(brunch,itemID,amount);
+	}
+	
+	
+	private void decItemAmount(JSONObject i_Data) throws Exception
+	{
+		int amount = i_Data.getInt("amount");
+		String itemID = i_Data.getString("ID");
+		eBrunches brunch = i_Data.getEnum(eBrunches.class, "brunch");
+		m_FileManager.DecItemAmount(brunch, itemID, amount);
+	}
+}

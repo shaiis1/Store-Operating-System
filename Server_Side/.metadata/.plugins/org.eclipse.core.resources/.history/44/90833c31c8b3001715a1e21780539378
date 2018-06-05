@@ -1,0 +1,10 @@
+package Server;
+
+public class AllReadyConnectedException extends Exception
+{
+	public AllReadyConnectedException(Worker i_Worker)
+	{
+		
+	}
+
+}

@@ -1,0 +1,109 @@
+package FileActionUpdate;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.Scanner;
+
+import org.json.JSONObject;
+
+import FileActionsExceptions.DeleteFileException;
+import FileActionsExceptions.NotFoundException;
+import FileActionsExceptions.RenameFileException;
+
+public abstract class UpdateFileAction
+{
+	private String m_Field;
+	private String m_Value;
+	private String m_DBPath;
+	
+	public UpdateFileAction(String i_FieldToSearch,String i_ValueToSearch,String i_DBPath)
+	{
+		m_Field = i_FieldToSearch;
+		m_Value = i_ValueToSearch;
+		m_DBPath = i_DBPath;
+	}
+	
+	public final void Execute() throws Exception
+	{
+		int number;
+		Exception CoughtEX = null;
+		File inputFile = null;
+        File tempFile = null;
+		Scanner fileScanner = null;
+        PrintWriter filePrinter = null;
+        JSONObject json;
+        String line;
+        boolean found = false;
+        
+        try
+        {
+        	inputFile = new File(m_DBPath);
+            tempFile = new File(inputFile.getAbsolutePath() + ".tmp");
+            fileScanner = new Scanner(inputFile);
+            filePrinter = new PrintWriter(tempFile);
+            
+        	number = Integer.parseInt(fileScanner.nextLine());
+            if(m_Field == null && m_Value==null)//indcates file index increacement
+            {
+            	found=true;
+            	number++;
+            }
+        	filePrinter.println(number);
+        	filePrinter.flush();
+            
+            while (fileScanner.hasNextLine())
+            {
+            	line = fileScanner.nextLine();
+            	json = new JSONObject(line);
+            	
+                if ((m_Field == null && m_Value==null) || !json.getString(m_Field).equals(m_Value))
+                {
+                	filePrinter.println(line);
+                	filePrinter.flush();
+                }
+                else
+                {
+                	found=true;
+                	try
+                	{
+                		DoWhenFound(json,filePrinter);//Injection Point
+                	}
+                	
+                	catch(Exception ex)
+                	{
+                		CoughtEX = ex;
+                	}
+                }
+            }
+        }
+        finally
+        {
+            
+            filePrinter.close();
+            fileScanner.close();
+            
+            if(CoughtEX != null)
+            {
+            	throw CoughtEX;
+            }
+            if(!found)
+            {
+            	throw new NotFoundException(m_Field + " : " + m_Value + " was not found!");
+            }
+            //Delete the original file
+            if (!inputFile.delete())
+            {
+                throw new DeleteFileException("Could not delete file");
+            }
+
+            //Rename the new file to the filename the original file had.
+            if (!tempFile.renameTo(inputFile))
+            {
+            	throw new RenameFileException("Could not rename file");
+            }
+        }
+	}
+	
+	protected abstract void DoWhenFound(JSONObject i_Data,PrintWriter i_filePrinter) throws Exception;
+}

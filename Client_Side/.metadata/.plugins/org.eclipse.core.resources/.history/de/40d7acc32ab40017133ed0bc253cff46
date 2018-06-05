@@ -1,0 +1,20 @@
+package UI;
+
+import java.awt.TrayIcon.MessageType;
+
+import javax.swing.Icon;
+import javax.swing.JOptionPane;
+
+public class Popups
+{
+	public static void ShowError(String i_Message)
+	{
+		JOptionPane.showMessageDialog(null,i_Message,"Error!",MessageType.ERROR.ordinal());
+	}
+	public static void ShowWarrning(String i_Message)
+	{
+		JOptionPane.showMessageDialog(null,i_Message,"Error!",MessageType.WARNING.ordinal());
+	}
+	private static void Show(i_Message,int i_Type)
+
+}

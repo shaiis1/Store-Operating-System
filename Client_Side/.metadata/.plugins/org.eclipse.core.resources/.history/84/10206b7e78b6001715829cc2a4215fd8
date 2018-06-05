@@ -1,0 +1,87 @@
+package UI.Frames.Invetory;
+
+import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.net.UnknownHostException;
+
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import Items.Item;
+import Items.eItemsName;
+import ServerFunctions.FromServerException;
+import ServerFunctions.ServerFunctionExecuter;
+import UI.Frames.AddRemove.SendingActionListener;
+import UI.Frames.AddRemove.sendingFrame;
+
+@SuppressWarnings("serial")
+public class addToInventoryFrame extends sendingFrame
+{
+	private JComboBox<eItemsName> itemsNamesComboBox;
+	private JTextField amountToIncTextField;
+
+	public addToInventoryFrame()
+	{
+		super();
+	}
+	
+	@Override
+	protected JPanel createMainPanel()
+	{
+		JPanel myMainPanel = new JPanel();
+		
+		itemsNamesComboBox = new JComboBox<eItemsName>(eItemsName.values());
+		amountToIncTextField = new JTextField(6);		
+		
+		myMainPanel.add(itemsNamesComboBox);
+		myMainPanel.add(amountToIncTextField);
+		
+		return myMainPanel;
+	}
+	
+	@Override
+	protected String getSendButtonName() 
+	{
+		return "Add to invertory";
+	}
+	
+	@Override
+	protected SendingActionListener OnSendButtonClicked()
+	{
+		//TODO:DASDSAD
+		return new SendingActionListener() {
+			
+			@Override
+			public void sendAction(ActionEvent e) throws UnknownHostException, IOException, FromServerException
+			{
+				ServerFunctionExecuter.getInstance().IncItemAmount(new Item((eItemsName) itemsNamesComboBox.getSelectedItem()), Integer.parseInt(amountToIncTextField.getText()));
+			}
+		};
+	}
+
+	@Override
+	protected String getFrameTitle()
+	{
+		return "Add to invertory";
+	}
+
+	@Override
+	protected int getFrameWidth()
+	{
+		return 300;
+	}
+
+	@Override
+	protected int getFrameHeight()
+	{
+		return 300;
+	}
+
+	@Override
+	protected String getOnSuccessMessage()
+	{
+		return "Added successfuly!";
+	}
+	
+}

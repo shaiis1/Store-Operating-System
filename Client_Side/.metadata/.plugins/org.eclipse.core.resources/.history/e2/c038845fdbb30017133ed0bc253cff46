@@ -1,0 +1,13 @@
+package ChatMessage;
+
+import javax.swing.table.DefaultTableModel;
+
+public class ChatTableModel extends DefaultTableModel
+{
+	
+	
+    public void setRowColour(int row, Color c) {
+        rowColours.set(row, c);
+        fireTableRowsUpdated(row, row);
+    }
+}

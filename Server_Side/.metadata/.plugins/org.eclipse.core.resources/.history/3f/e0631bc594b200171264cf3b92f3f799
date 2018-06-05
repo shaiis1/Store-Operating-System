@@ -1,0 +1,415 @@
+package Server;
+
+import java.io.*;
+import java.net.*;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import javax.xml.bind.ValidationException;
+
+import org.json.*;
+import Items.ItemAmount;
+import NetworkMessage.ErrorMessage;
+import NetworkMessage.RequestMessage;
+import NetworkMessage.ResponseMessage;
+import NetworkMessage.SuccessMessage;
+import NetworkMessage.eErrorType;
+import NetworkMessage.eFunctions;
+import Purchase.Purchase;
+import Purchase.PurchaseTrack;
+import Workers.*;
+import Customer.*;
+import FileActionsExceptions.AllReadyExistsException;
+import FileActionsExceptions.DeleteFileException;
+import FileActionsExceptions.IncompatibleException;
+import FileActionsExceptions.NotFoundException;
+import FileActionsExceptions.OutOfRangeException;
+import FileActionsExceptions.RenameFileException;
+
+
+public class Server
+{	
+	
+	private int m_ServerSocketNumber = 10000;
+	private int m_ClientSocketNumber = 3500;
+	private final Object m_ConnectedUsersKey = new Object();
+	private final FilesManager m_FileManager;
+	private final ServerSocket m_ServerSocket;
+	private final DateFormat m_LogDateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+	private final Map<Worker,SocketData> m_ConnectedUsers;
+	
+	public Server() throws IOException
+	{
+		m_FileManager = FilesManager.CreateOrGetInstance();
+		m_ServerSocket = new ServerSocket(m_ServerSocketNumber);
+		m_ConnectedUsers = new LinkedHashMap<Worker, SocketData>();
+	}
+	
+	@Override
+	public void finalize()
+	{
+		if(!m_ServerSocket.isClosed())
+		{
+			try
+			{
+				m_ServerSocket.close();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}	
+		}
+	}
+		
+	public void StartServer() throws IOException
+	{
+		while(true)
+		{
+			final Socket socket = m_ServerSocket.accept();
+			
+			new Thread(new Runnable()
+			{
+				private Worker m_LoggedInUser = null;
+				private SocketData m_ToUserSocketData = null;
+				@SuppressWarnings("deprecation")
+				@Override
+				public void run()
+				{
+					RequestMessage messageFromClient = null;
+					ResponseMessage messageToClient;
+					
+					try
+					{
+						SocketData currentSocket = new SocketData(socket);
+						currentSocket.GetToNetStream().print(++m_ServerSocketNumber);
+						if(currentSocket.GetFromNetStream().readBoolean())
+						{
+							m_ToUserSocketData = new SocketData(new Socket("localhost",m_ClientSocketNumber++));
+							if(!m_ToUserSocketData.GetFromNetStream().readBoolean())
+							{
+								throw new IOException("couldnt establish connection to client");
+							}
+							m_ToUserSocketData.GetFromNetStream().skip(3);
+						}
+						
+						
+						messageFromClient = new RequestMessage(new JSONObject(currentSocket.GetFromNetStream().readLine()));
+						while(!messageFromClient.getFunction().equals(eFunctions.CloseConnection))
+						{
+							messageToClient = ExecuteFunction(messageFromClient);
+							currentSocket.GetToNetStream().println(messageToClient.GetJSONObject().toString());
+							messageFromClient = new RequestMessage(new JSONObject(currentSocket.GetFromNetStream().readLine()));
+						}
+						
+						if(m_ConnectedUsers.containsKey(m_LoggedInUser))
+						{
+							signOut(m_LoggedInUser);
+						}
+						socket.close();
+					}
+					catch (IOException e)
+					{
+					}				
+				}
+				
+				private ResponseMessage ExecuteFunction(RequestMessage i_ClientRequest)
+				{
+					eFunctions function = i_ClientRequest.getFunction();
+					JSONObject data = i_ClientRequest.getData();
+					JSONObject dataToReturn = null;
+					ResponseMessage messageToReturn = null;
+					
+					try
+					{
+						if(m_LoggedInUser==null && function != eFunctions.SignIn)
+						{
+							throw new Exception("You Must Sign in Before doing any operation");
+						}
+						
+						switch(function)
+						{
+							case SignIn			:	signIn(data);
+													dataToReturn = m_LoggedInUser.GetJSONObject();
+													break;
+							case AddCustomer	:	addCustomer(data);
+													break;
+							case AddWorker		:	addWorker(data);
+													break;
+							case RemoveWorker 	: 	removeWorker(data);
+													break;
+							case RemoveCustomer :	removeCustomer(data);
+													break;
+							case IncItemAmount	:   incItemAmount(data);
+													break;
+							case GetVIPCustomers:   dataToReturn = getVipCustomers();
+													break;
+							case GetAllCustomers:   dataToReturn = getAllCustomers();
+													break;
+							case GetAllWorkers	:	dataToReturn = getAllWorkers();
+													break;
+							case GetAllExistItems:	dataToReturn = getAllExistItems();
+													break;
+							case GetItemsAmount	:	dataToReturn = getItemsAmount(m_LoggedInUser.getBranch());
+													break;					
+							case GetAllPurchaseTrack:dataToReturn = GetAllPurchaseTrack();
+													break;
+							case ChangePurchaseTrack:ChangePurcaseTrack(data);
+													break;
+							case GetPurchaseTotalPrice: dataToReturn = getPurcaseTotalPrice(data);
+													break;
+							case CommitPurchase	:	dataToReturn = commitPurchase(data);
+													break;
+							case GetTotaySalesReport:dataToReturn = getTodaySalesReport(data);
+													break;
+							case GetAllConnectedWorkes:dataToReturn = getAllConnectedUsers();
+													break;
+							default				:	messageToReturn = new ErrorMessage("No Such Function",eErrorType.Client);
+						}
+					}
+					catch(Exception ex)
+					{
+						messageToReturn = GetMessageErrorByException(ex);
+					}
+					finally
+					{
+						if(messageToReturn == null)
+						{					
+							messageToReturn = new SuccessMessage(dataToReturn == null ? null : dataToReturn.toString());
+						}
+					}
+					
+					return messageToReturn;
+				}
+				
+				private void ChangePurcaseTrack(JSONObject i_Data) throws NumberFormatException, JSONException, FileNotFoundException, IllegalArgumentException, IOException, NotFoundException, DeleteFileException, RenameFileException, OutOfRangeException
+				{
+					PurchaseTrack purchaseTrackToChange = new PurchaseTrack(i_Data);
+					m_FileManager.ChangePurchaseTrack(purchaseTrackToChange);
+				}
+
+				private JSONObject GetAllPurchaseTrack() throws JSONException, IOException
+				{
+					return encapsulateToJSONObject(m_FileManager.getAllPurchaseTrack());
+				}
+
+				private JSONObject getAllWorkers() throws JSONException, IOException, IncompatibleException
+				{
+					return encapsulateToJSONObject(m_FileManager.GetAllWorkers(m_LoggedInUser.getBranch()));
+				}
+				private ResponseMessage GetMessageErrorByException(Exception ex)
+				{
+					eErrorType whosFault = eErrorType.UnKnown;
+					
+					if(	ex instanceof FileNotFoundException ||
+						ex instanceof IOException ||
+						ex instanceof DeleteFileException ||
+						ex instanceof RenameFileException)
+					{
+						whosFault = eErrorType.Server;
+					}
+					else if(	ex instanceof IncompatibleException ||
+								ex instanceof IllegalArgumentException ||
+								ex instanceof JSONException ||
+								ex instanceof NumberFormatException ||
+								ex instanceof OutOfRangeException ||
+								ex instanceof AllReadyExistsException ||
+								ex instanceof CreateCustomerException ||
+								ex instanceof CreateWorkerException ||
+								ex instanceof NotFoundException ||
+								ex instanceof ParseException ||
+								ex instanceof ValidationException)
+					{
+						whosFault = eErrorType.Client;
+					}
+					
+					return new ErrorMessage(ex.getMessage(),whosFault);
+				}
+
+				
+				//------------------------Users Functions------------------------//
+				private void signIn(JSONObject data) throws JSONException, FileNotFoundException, ValidationException, IncompatibleException, IOException, NotFoundException, CreateWorkerException 
+				{	
+					m_LoggedInUser =  m_FileManager.SignIn(data.getString("workerNumber"),  data.getString("password"));
+					notifyNewUser(m_LoggedInUser);
+					m_ConnectedUsers.put(m_LoggedInUser, m_ToUserSocketData);
+				}
+				
+				//------------------------Chat Functions------------------------//
+				private void notifyNewUser(Worker i_Worker)
+				{
+					RequestMessage requestMessage = new RequestMessage(eFunctions.NewConnectedUser,i_Worker.GetJSONObject());
+					notifyAllConnectedUsers(requestMessage);
+				}				
+				private void signOut(Worker i_Worker)
+				{
+					synchronized(m_ConnectedUsersKey)
+					{
+						m_ConnectedUsers.remove(i_Worker);
+					}
+					notifyRemoveUser(i_Worker);
+				}
+				private void notifyRemoveUser(Worker i_Worker)
+				{
+					RequestMessage requestMessage = new RequestMessage(eFunctions.RemoveConnectedUser,i_Worker.GetJSONObject());
+					notifyAllConnectedUsers(requestMessage);
+				}	
+				private void notifyAllConnectedUsers(RequestMessage i_RequestMessage)
+				{
+					synchronized(m_ConnectedUsersKey)
+					{
+						for(SocketData socket : m_ConnectedUsers.values())
+						{
+							socket.GetToNetStream().println(i_RequestMessage.GetJSONObject().toString());
+						}
+					}
+				}
+				private JSONObject getAllConnectedUsers()
+				{
+					JSONArray connectedUsers = new JSONArray();
+					
+					synchronized(m_ConnectedUsersKey)
+					{
+						for(Worker worker : m_ConnectedUsers.keySet())
+						{
+							if(worker.getID().compareTo(m_LoggedInUser.getID()) != 0)
+							{
+								connectedUsers.put(worker.GetJSONObject());
+							}
+						}
+					}
+					
+					return encapsulateToJSONObject(connectedUsers);
+				}
+				
+				//------------------------Adding Functions------------------------//
+				private void addWorker(JSONObject i_Worker) throws CreateWorkerException, NumberFormatException, JSONException, IllegalArgumentException, IOException, NotFoundException, DeleteFileException, RenameFileException, OutOfRangeException, AllReadyExistsException
+				{
+					User newWorker = new User(i_Worker);
+					m_FileManager.AddWorker(newWorker);
+					m_FileManager.SaveLog(getStringLog(String.format("New Worker Added %s", newWorker.toString())));
+				}
+				
+				private void addCustomer(JSONObject i_Customer) throws CreateCustomerException, NumberFormatException, FileNotFoundException, JSONException, IllegalArgumentException, IOException, NotFoundException, DeleteFileException, RenameFileException, OutOfRangeException, AllReadyExistsException, IncompatibleException
+				{
+					Customer customer = CustomerFactory.CreateCustomer(i_Customer);
+					if(customer instanceof NewCustomer)
+					{
+						m_FileManager.AddCustomer(customer);
+						m_FileManager.SaveLog(getStringLog(String.format("New Custoer Added %s", customer.toString())));
+					}
+					else
+					{
+						throw new IncompatibleException("Must be new customer");
+					}
+				}
+
+				//------------------------Removing Functions------------------------//
+				private void removeWorker(JSONObject i_Worker) throws CreateWorkerException, NumberFormatException, JSONException, FileNotFoundException, IllegalArgumentException, IOException, NotFoundException, DeleteFileException, RenameFileException, OutOfRangeException
+				{
+					Worker worker = WorkerFactory.CreateWorker(i_Worker);
+					m_FileManager.RemoveWorker(worker);
+				}				
+				private void removeCustomer(JSONObject i_Customer) throws CreateCustomerException, NumberFormatException, JSONException, FileNotFoundException, IllegalArgumentException, IOException, NotFoundException, DeleteFileException, RenameFileException, OutOfRangeException
+				{
+					Customer customer = CustomerFactory.CreateCustomer(i_Customer);
+					m_FileManager.RemoveCustomer(customer);
+				}
+				
+				//------------------------Items Functions------------------------//
+				private JSONObject getAllExistItems() throws JSONException, IOException
+				{
+					return encapsulateToJSONObject(m_FileManager.GetAllExistItems());
+				}
+				private JSONObject getItemsAmount(eBranches i_Branch) throws FileNotFoundException, JSONException, IncompatibleException, IOException
+				{
+					return encapsulateToJSONObject(m_FileManager.GetItemsAmount(i_Branch));
+				}
+				private void incItemAmount(JSONObject i_Data) throws NumberFormatException, JSONException, FileNotFoundException, IllegalArgumentException, IOException, DeleteFileException, RenameFileException, OutOfRangeException, NotFoundException
+				{
+					ItemAmount itemAmount = new ItemAmount(i_Data);
+					m_FileManager.IncItemAmount(itemAmount);
+				}
+				
+				//------------------------Purchase Functions------------------------//
+				private JSONObject commitPurchase(JSONObject data)throws NumberFormatException, FileNotFoundException,JSONException, IllegalArgumentException,IncompatibleException, IOException, OutOfRangeException,NotFoundException,DeleteFileException, RenameFileException, CreateCustomerException, ParseException
+				{
+					Purchase purchase = new Purchase(data);	
+					Purchase purchaseToReturn =  m_FileManager.CommitPurchaseAndUpdateCustomer(purchase);
+					m_FileManager.SaveLog(getStringLog(purchaseToReturn.toString()));
+					return purchaseToReturn.GetJSONObject();
+				}
+				private JSONObject getPurcaseTotalPrice(JSONObject data) throws JSONException, IOException,IncompatibleException, NotFoundException, CreateCustomerException, ParseException
+				{
+					Purchase purchase = new Purchase(data);
+					double price = m_FileManager.GetTotalBill(purchase);
+					JSONObject toReturn = new JSONObject();
+					toReturn.put("price", price);
+					return toReturn;
+				}
+
+				//------------------------Reports Functions------------------------//
+				private JSONObject getVipCustomers() throws FileNotFoundException, JSONException, IncompatibleException, IOException
+				{
+					return encapsulateToJSONObject(m_FileManager.GetVipCustomers());
+				}
+				private JSONObject getAllCustomers() throws FileNotFoundException, JSONException, IncompatibleException, IOException
+				{
+					return encapsulateToJSONObject(m_FileManager.GetAllCustomers());
+				}
+				private JSONObject getTodaySalesReport(JSONObject data) throws FileNotFoundException, JSONException, IncompatibleException, IOException
+				{
+					//Data contains Field to filter the data by(Category,ItemName)
+					//The values of the Field
+					
+					String field = data.getString("field");
+					eBranches branchToGetReportFrom;
+					JSONArray arrValuesJSON;
+					String [] values = null;
+					
+					if(!field.equals("branch"))
+					{
+						//Getting the valuse to filter by
+						branchToGetReportFrom = m_LoggedInUser.getBranch();
+						arrValuesJSON = data.getJSONArray("values");
+						values = new String [arrValuesJSON.length()];
+						
+						for(int i=0;i<values.length;i++)
+						{
+							values[i] = arrValuesJSON.getString(i);
+						}
+					}
+					else
+					{
+						branchToGetReportFrom = data.getJSONArray("values").getEnum(eBranches.class, 0);
+					}
+					
+					return encapsulateToJSONObject(m_FileManager.GetTodaysSalesReport(branchToGetReportFrom,field,values));
+				}
+
+				//Private Functions
+				private JSONObject encapsulateToJSONObject(JSONArray arr)
+				{
+					JSONObject newJSONObject =  new JSONObject();
+					
+					newJSONObject.put("JSONArray", arr);
+					
+					return newJSONObject;
+				}
+				
+				private String getStringLog(String i_Message)
+				{
+					StringBuilder logBuilder = new StringBuilder();
+					logBuilder.append(String.format("| at %s |" , m_LogDateFormat.format(Calendar.getInstance().getTime())));
+					logBuilder.append(String.format("by user %s %s (number:%s)| ",m_LoggedInUser.getFirstName(),m_LoggedInUser.getLastName(),m_LoggedInUser.getWorkerNumber()));
+					logBuilder.append(i_Message);
+					return logBuilder.toString();
+				}
+
+			}).start();
+		}
+	}
+}

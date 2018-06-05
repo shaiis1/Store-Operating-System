@@ -1,0 +1,8 @@
+7
+{"firstName":"Tamir","lastName":"sh","phoneNumber":"053242343","ID":"2","type":"VipCustomer"}
+{"firstName":"Amir","lastName":"Barak","phoneNumber":"0525934843","ID":"3","type":"VipCustomer"}
+{"firstName":"Shay","lastName":"israely","phoneNumber":"0532934933","ID":"1","type":"VipCustomer"}
+{"lastName":"Zimon","firstName":"Roi","phoneNumber":"33333","ID":"6","type":"NewCustomer"}
+{"firstName":"lolo","lastName":"bobo","phoneNumber":"943294932","ID":"32","type":"NewCustomer"}
+{"lastName":"boba","firstName":"lola","phoneNumber":"9384902834","ID":"123132","type":"NewCustomer"}
+{"lastName":"bababab","firstName":"bamaba","phoneNumber":"12321312","ID":"12312312","type":"NewCustomer"}

@@ -1,0 +1,85 @@
+package UI.Frames;
+
+import java.awt.Color;
+import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+
+import ServerFunctions.FromServerException;
+import ServerFunctions.ServerFunctionExecuter;
+import UI.Panels.panelsManager;
+
+public class MainFrame extends allFramesBase
+{
+	private int frameWidth = (int)(Toolkit.getDefaultToolkit().getScreenSize().width * 0.4);
+	private int frameHeight = (int)(Toolkit.getDefaultToolkit().getScreenSize().height * 0.8);
+	
+	private panelsManager mainPanel;
+	
+	public MainFrame() throws Exception
+	{
+		super();
+		setFrame();
+	}
+	
+	
+	
+	private void setFrame()
+	{	
+
+		this.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e)
+			{
+				try
+				{
+					if(ServerFunctionExecuter.getInstance().GetLoggedInUser()!=null)
+					{
+						ServerFunctionExecuter.getInstance().SignOut();
+					}
+				}
+				catch (IOException | FromServerException e1)
+				{
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+
+
+		
+		
+	}
+
+
+	@Override
+	protected String getFrameTitle()
+	{
+		return "Store operating system";
+	}
+
+
+	@Override
+	protected int getFrameWidth() {
+		frameWidth = (int)(Toolkit.getDefaultToolkit().getScreenSize().width * 0.4);
+		return frameWidth;
+	}
+
+
+	@Override
+	protected int getFrameHeight() {
+		frameHeight = (int)(Toolkit.getDefaultToolkit().getScreenSize().height * 0.8);
+		return frameHeight;
+	}
+
+
+	@Override
+	protected JPanel getMainPanel() {
+		return new panelsManager(frameWidth,frameHeight);
+	}
+}

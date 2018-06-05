@@ -1,0 +1,7 @@
+package ChatMessage;
+
+import javax.swing.table.DefaultTableModel;
+
+public class ChatTableModel extends DefaultTableModel {
+
+}

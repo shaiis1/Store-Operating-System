@@ -1,0 +1,148 @@
+package UI.Frames.Statistics;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.Map;
+import java.util.Vector;
+import java.util.Map.Entry;
+
+import javax.swing.JCheckBox;
+import javax.swing.JPanel;
+
+import Customer.eCustomer;
+import Items.ItemAmount;
+import Items.eItemCategory;
+import Items.eItemsName;
+import ServerFunctions.FromServerException;
+import ServerFunctions.ServerFunctionExecuter;
+import UI.Frames.checkBoxTabledFrame;
+import UI.Frames.tableFrame;
+
+@SuppressWarnings("serial")
+public class byCategoryFrame extends checkBoxTabledFrame
+{
+	private Vector<JCheckBox> categoryCheckBoxes;
+	
+	public byCategoryFrame() throws Exception
+	{
+		super();
+	}
+
+	@Override
+	protected  void setTableData(Vector<Vector<Object>> i_Data) throws UnknownHostException, IOException, FromServerException
+	{
+		Vector<String> selectedValues = new Vector<String>(); 
+		for(JCheckBox checkbox : categoryCheckBoxes)
+		{
+			if(checkbox.isSelected())
+			{
+				selectedValues.add(checkbox.getText());
+			}
+		}
+		Map<eItemCategory, ItemAmount> dataFromServer = ServerFunctionExecuter.getInstance().GetTodaysSalesReportByCategorys(selectedValues);
+		
+		i_Data.clear();
+		
+  		for(Entry<eItemCategory,ItemAmount> Row : dataFromServer.entrySet()){
+  			i_Data.add(new Vector<Object>(){{
+  				this.add(Row.getValue().getItemCategory());
+  				this.add(Row.getValue().getAmount());
+			   	this.add(Row.getValue().getBranch().toString());
+			   	}});
+  			}
+	}
+	
+	@Override
+	protected JPanel createMainPanel()
+	{
+		JPanel myMainPanel = new JPanel();
+		categoryCheckBoxes = new Vector<JCheckBox>();
+		
+		JCheckBox currentCheckBox;
+		
+		for(eItemCategory category : eItemCategory.values())
+		{
+			currentCheckBox = new JCheckBox(category.name());
+			categoryCheckBoxes.add(currentCheckBox);
+			myMainPanel.add(currentCheckBox);
+		}
+		
+		myMainPanel.add(super.createMainPanel());
+		return myMainPanel;
+	}
+	
+	
+	
+	@Override
+	protected Vector<String> getColumnsNames() {
+		Vector<String> columnNames = new Vector<String>();
+		columnNames.add("Category");
+		columnNames.add("Amount");
+		columnNames.add("Branch");
+		return columnNames;
+	}
+
+	@Override
+	protected String getFrameTitle() {
+		return "Report by category";
+	}
+
+	@Override
+	protected ActionListener setCheckboxActionListener(JCheckBox checkBox) {
+		// TODO Auto-generated method stub
+		return new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				int i;
+				if(checkBox.isSelected())
+				{
+					
+					Map<eItemsName, ItemAmount> dataFromServer;
+					try {
+						dataFromServer = ServerFunctionExecuter.getInstance().GetTodaySalesReporyByItemsName(new String [] {checkBox.getText()});
+					
+					
+					for(Entry<eItemsName, ItemAmount> Row : dataFromServer.entrySet()){
+						myTableData.add(new Vector<Object>(){{
+							this.add(Row.getKey().name());
+							this.add(Row.getValue().getAmount());
+							this.add(Row.getValue().getItemCategory());
+							this.add(Row.getValue().getBranch().toString());
+							}}); //end of data adding
+						} //end of inner for
+					
+					} catch (IOException | FromServerException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+				else
+				{
+					for(i=0;i<myTableData.size();i++)
+					{
+						if(myTableData.get(i).get(0).toString().compareTo(checkBox.getText())==0)
+						{
+							break;
+						}
+					}
+					myTableData.remove(i);
+				}
+				
+			}
+		};
+	}
+
+	@Override
+	protected String[] getCheckboxValues() {
+		String[] names = new String[eItemCategory.values().length];
+		for(int i=0;i<names.length;i++)
+		{
+			names[i] = eItemsName.values()[i].name();
+		}
+		return names;
+	}
+}

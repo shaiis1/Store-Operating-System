@@ -1,0 +1,9 @@
+8
+{"firstName":"Eti","lastName":"Paron","phoneNumber":"0548398287","ID":"205993943","type":"VipCustomer"}
+{"firstName":"Uri","lastName":"Hai","phoneNumber":"0547969287","ID":"2048593848","type":"ReturnedCustomer"}
+{"firstName":"Ben","lastName":"Vini","phoneNumber":"0528777765","ID":"204893030","type":"ReturnedCustomer"}
+{"firstName":"Yoav","lastName":"Shaked","phoneNumber":"0547726172","ID":"2059389483","type":"NewCustomer"}
+{"firstName":"Yulia","lastName":"Vi","phoneNumber":"0542376163","ID":"204938474","type":"NewCustomer"}
+{"firstName":"Roni","lastName":"Daniel","phoneNumber":"0546526521","ID":"3029948378","type":"NewCustomer"}
+{"firstName":"Bar","lastName":"Dayan","phoneNumber":"0547883762","ID":"2058839282","type":"NewCustomer"}
+{"firstName":"Gal","lastName":"Galon","phoneNumber":"0527654321","ID":"20583988899","type":"ReturnedCustomer"}

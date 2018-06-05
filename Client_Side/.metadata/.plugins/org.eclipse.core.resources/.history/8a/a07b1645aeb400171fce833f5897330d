@@ -1,0 +1,125 @@
+package UI.Panels;
+
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JPanel;
+import ServerFunctions.ServerFunctionExecuter;
+import UI.superButton;
+import UI.Frames.AddRemove.addOrRemoveFrame;
+import UI.Frames.All.AllEmployeesFrame;
+import UI.Frames.Statistics.StoreStatisticsFrame;
+import Workers.Worker;
+
+public class ManagerPanel extends WorkerPanel {
+
+	private superButton storeStatisticsButton;
+	private superButton allEmployeesButton;
+	private superButton addOrRemoveButton;
+	
+	public ManagerPanel(){
+		super();
+	}
+	
+	@Override
+	protected void createComponents()
+	{
+		super.createComponents();
+		storeStatisticsButton = new superButton("Store statistics"); //frame with information about all statistics
+		allEmployeesButton = new superButton("Employees"); //frame with information about all workers
+		addOrRemoveButton = new superButton("Add or remove"); //frame with register ability of new worker, customer or remove worker.
+	}
+	
+	@Override
+	protected void attachToPanels()
+	{
+		super.attachToPanels();
+		rightPanel.add(storeStatisticsButton);
+		rightPanel.add(allEmployeesButton);
+		rightPanel.add(addOrRemoveButton);
+
+	}
+	
+	@Override
+	protected void addEvents()
+	{
+		super.addEvents();
+
+	}
+	
+	private void addEvents() {
+
+		
+
+
+	}
+	
+	
+	private void addOnAllEmployeesButtonClicked()
+	{
+		allEmployeesButton.addActionListener(new ActionListener()
+	    {
+	      public void actionPerformed(ActionEvent e)
+	      {
+	    	  Thread employeesThread = new Thread(new Runnable(){
+	    		  @Override
+	    		  public void run(){
+	    			  try{
+	    					new AllEmployeesFrame();
+	    			  }
+	    			  catch (Exception e1){
+	    					e1.printStackTrace();
+	    			  }
+	    		  }	  
+	    	  });
+	    	  employeesThread.start();
+	      }
+	    });
+	}
+	
+	
+	private void addOnaddOrRemoveButtonClicked()
+	{
+		//addOrRemoveButton On Click
+		addOrRemoveButton.addActionListener(new ActionListener()
+	    {
+	      public void actionPerformed(ActionEvent e)
+	      {
+	    	  Thread registerThread = new Thread(new Runnable(){
+	    		  @Override
+	    		  public void run(){
+	    			  try{
+	    					new addOrRemoveFrame();
+	    			  }
+	    			  catch (Exception e1){
+	    					e1.printStackTrace();
+	    			  }
+	    		  }	  
+	    	  });
+	    	  registerThread.start();
+	      }
+	    });
+	}
+	private void addStoreStatisticsButtonClicked()
+	{
+		storeStatisticsButton.addActionListener(new ActionListener()
+	    {
+	      public void actionPerformed(ActionEvent e)
+	      {
+	    	  Thread inventoryThread = new Thread(new Runnable(){
+	    		  @Override
+	    		  public void run(){
+	    			  try{
+	    				  
+	    					new StoreStatisticsFrame();
+	    			  }
+	    			  catch (Exception e1){
+	    					e1.printStackTrace();
+	    			  }
+	    		  }	  
+	    	  });
+	    	  inventoryThread.start();
+	      }
+	    });
+	}
+}

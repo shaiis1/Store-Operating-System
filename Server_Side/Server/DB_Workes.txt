@@ -1,0 +1,12 @@
+12
+{"workerNumber":"1","lastName":"Zeavi","firstName":"Moshe","phoneNumber":"0543973112","ID":"309482813","type":"ShiftManager","branch":"RishonLeZion","password":"123","bankAccountNumber":"5843821"}
+{"workerNumber":"2","lastName":"Halfon","firstName":"Tom","phoneNumber":"0528348213","ID":"204938281","type":"ShiftManager","branch":"TelAviv","password":"123","bankAccountNumber":"5843821"}
+{"workerNumber":"3","firstName":"Gil","lastName":"Baruch","password":"123","phoneNumber":"0537283742","bankAccountNumber":"1827483","ID":"202958473","type":"Seller","branch":"RishonLeZion"}
+{"workerNumber":"4","firstName":"Hanan","lastName":"Damari","password":"123","phoneNumber":"0547382911","bankAccountNumber":"7483727","ID":"304938574","type":"Cashier","branch":"RishonLeZion"}
+{"workerNumber":"5","firstName":"Adi","lastName":"Tzarfari","password":"123","phoneNumber":"0529483843","bankAccountNumber":"1948375","ID":"201194800","type":"Cashier","branch":"RishonLeZion"}
+{"workerNumber":"6","firstName":"Nofar","lastName":"Belulu","password":"123","phoneNumber":"0523858348","bankAccountNumber":"8227311","ID":"2058493848","type":"Cashier","branch":"RishonLeZion"}
+{"workerNumber":"7","firstName":"Sharon","lastName":"Halfon","password":"123","phoneNumber":"0544332929","bankAccountNumber":"2948378","ID":"305938485","type":"Seller","branch":"RishonLeZion"}
+{"workerNumber":"8","firstName":"Alex","lastName":"Mizrahi","password":"123","phoneNumber":"0548442113","bankAccountNumber":"75645342","ID":"304958384","type":"Seller","branch":"TelAviv"}
+{"workerNumber":"9","firstName":"Jon","lastName":"Birion","password":"123","phoneNumber":"0539999898","bankAccountNumber":"9000321","ID":"2049385823","type":"Seller","branch":"TelAviv"}
+{"workerNumber":"10","firstName":"Avi","lastName":"Ron","password":"123","phoneNumber":"0541239822","bankAccountNumber":"6603432","ID":"307748384","type":"Cashier","branch":"TelAviv"}
+{"workerNumber":"11","firstName":"Oren","lastName":"Hazan","password":"123","phoneNumber":"0501774328","bankAccountNumber":"2876334","ID":"203885300","type":"Cashier","branch":"TelAviv"}
